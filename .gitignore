@@ -56,3 +56,6 @@ src/objects/Task.object
 src/objects/User.object
 src/objects/UserLicense.object
 src/package.xml
+src/objects/Campaign.object
+src/objects/CampaignMember.object
+src/objects/Lead.object

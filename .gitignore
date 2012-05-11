@@ -59,3 +59,5 @@ src/package.xml
 src/objects/Campaign.object
 src/objects/CampaignMember.object
 src/objects/Lead.object
+.project
+.settings/

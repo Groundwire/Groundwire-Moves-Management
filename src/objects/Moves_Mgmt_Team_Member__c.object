@@ -95,4 +95,24 @@
     <pluralLabel>Moves Management Team Members</pluralLabel>
     <searchLayouts/>
     <sharingModel>ControlledByParent</sharingModel>
+    <validationRules>
+        <fullName>Contact_OR_Organization_Donor_Only</fullName>
+        <active>true</active>
+        <errorConditionFormula>AND(
+  NOT(ISBLANK(Donor_Contact__c)),
+  NOT(ISBLANK(Donor_Org__c))
+)</errorConditionFormula>
+        <errorDisplayField>Donor_Contact__c</errorDisplayField>
+        <errorMessage>You may only select either a Contact or an Organization Donor for this Moves Management Team Member, but not both.</errorMessage>
+    </validationRules>
+    <validationRules>
+        <fullName>Contact_or_Org_Must_Be_Filled_Out</fullName>
+        <active>true</active>
+        <errorConditionFormula>AND(
+  ISBLANK(Donor_Contact__c),
+  ISBLANK(Donor_Org__c)
+)</errorConditionFormula>
+        <errorDisplayField>Donor_Contact__c</errorDisplayField>
+        <errorMessage>You must select either a Contact or Organization donor for this Moves Management Team Member.</errorMessage>
+    </validationRules>
 </CustomObject>

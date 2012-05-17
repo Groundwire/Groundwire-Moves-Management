@@ -1,0 +1,3 @@
+<apex:page standardController="Opportunity" extensions="EXT_NewMove" action="{!newTask}">
+	<apex:outputText value="{!Opportunity.GWBase__ContactId__c}" rendered="false"/>
+</apex:page>

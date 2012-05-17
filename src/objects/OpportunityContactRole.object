@@ -5,11 +5,59 @@
         <fullName>Role</fullName>
         <picklist>
             <picklistValues>
-                <fullName>Business User</fullName>
+                <fullName>Decision Maker</fullName>
                 <default>false</default>
             </picklistValues>
             <picklistValues>
-                <fullName>Decision Maker</fullName>
+                <fullName>Donor</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Donor - Corporate Match</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Grant Officer</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Grant Team Member</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Household Soft Credit</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Influencer</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Moves Management Team Member</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Moves Manager</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Referrer</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Solicitor</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Speaker</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Other</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Business User</fullName>
                 <default>false</default>
             </picklistValues>
             <picklistValues>
@@ -29,15 +77,7 @@
                 <default>false</default>
             </picklistValues>
             <picklistValues>
-                <fullName>Influencer</fullName>
-                <default>false</default>
-            </picklistValues>
-            <picklistValues>
                 <fullName>Technical Buyer</fullName>
-                <default>false</default>
-            </picklistValues>
-            <picklistValues>
-                <fullName>Other</fullName>
                 <default>false</default>
             </picklistValues>
             <sorted>false</sorted>

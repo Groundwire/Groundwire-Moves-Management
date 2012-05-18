@@ -49,7 +49,6 @@ public with sharing class MovesManagement {
 		for (Contact c:consWithNewMovesManager) {
 			if (ownersToUpdate.containsKey(c.Moves_Manager__c)) {
 				c.OwnerId = ownersToUpdate.get(c.Moves_Manager__c);
-				system.debug('Worked! '+c.OwnerId);
 			}
 		}
 	}
@@ -161,9 +160,106 @@ public with sharing class MovesManagement {
 		
 	}
 	
+	public void movesOppRollup(set<id> oppsToRollup) {
+		map<id,Task> closedTaskMap = new map<id,Task>();
+		map<id,Task> openTaskMap = new map<id,Task>();
+		set<id> oppsThatExist = new set<id>();
+		list<Opportunity> oppsToUpdate = new list<Opportunity>();
+		
+		//loop through Closed tasks for our Opportunity records to roll up
+		for (Task t:[SELECT Id, WhatId, IsClosed, Subject FROM Task WHERE IsClosed=true AND WhatId IN :oppsToRollup ORDER BY ActivityDate DESC]) {
+			//take the most recently closed task by Activity date, add it to the closed task map
+			if (!closedTaskMap.containsKey(t.WhatId)) {
+				closedTaskMap.put(t.whatId,t);
+				oppsThatExist.add(t.whatId);
+			}
+		}
+		
+		//loop through Open tasks for our Opportunity records to roll up
+		for (Task t:[SELECT Id, WhatId, IsClosed, Subject FROM Task WHERE IsClosed=false AND WhatId IN :oppsToRollup ORDER BY ActivityDate]) {
+			//take the first open task by Activity date, add it to the open task map
+			if (!openTaskMap.containsKey(t.WhatId)) {
+				openTaskMap.put(t.whatId,t);
+				oppsThatExist.add(t.whatId);
+			}
+		}
+		
+		for (id oppId:oppsThatExist) {
+			Opportunity o = new Opportunity(
+				id=oppId,
+				Last_Move_Id__c=null,
+				Last_Move_Subject__c=null,
+				Next_Move_Id__c=null,
+				Next_Move_Subject__c=null
+			);
+			if (openTaskMap.containsKey(oppId)) {
+				o.Last_Move_Id__c = (string)openTaskMap.get(oppId).id;
+				o.Last_Move_Subject__c = openTaskMap.get(oppId).Subject;
+			}
+			if (closedTaskMap.containsKey(oppId)) {
+				o.Next_Move_Id__c = (string)closedTaskMap.get(oppId).id;
+				o.Next_Move_Subject__c = closedTaskMap.get(oppId).Subject;
+			}
+			oppsToUpdate.add(o);
+		}
+		
+		if (oppsToUpdate.size() > 0) {
+			update oppsToUpdate;
+		}
+	}
+	
 	/****************************************
 	*				TESTS					*
 	****************************************/
+	
+	static testmethod void testMovesRollups() {
+		Contact donor = new Contact(
+			FirstName = 'Homer',
+			LastName = 'Simpson',
+			Moves_Manager__c = null
+		);
+		insert donor;
+		
+		Opportunity opp = new Opportunity(
+			RecordTypeID = GWBase.GW_RecTypes.GetRecordTypeId('Opportunity','Major Donor'),
+			Amount = 888888,
+			CloseDate = system.today().addDays(8),
+			StageName = GWBase.ONEN_Constants.OPP_DEFAULT_STAGE,
+			GWBase__CR_Contact_Id__c = donor.id,
+			GWBase__ContactId__c = donor.id
+		);
+		insert opp;
+		
+		list<Task> taskList = new list<Task>();
+		for (integer i=0; i<5; i++) {
+			Task t = new Task(
+				WhoId = donor.id,
+				WhatId = opp.id,
+				Subject = 'subject'+i,
+				ActivityDate = system.today().addDays(-i),
+				Status = 'Completed'
+			);
+			taskList.add(t);
+		}
+		for (integer i=5; i<10; i++) {
+			Task t = new Task(
+				WhoId = donor.id,
+				WhatId = opp.id,
+				Subject = 'subject'+i,
+				ActivityDate = system.today().addDays(i),
+				Status = 'Not Started'
+			);
+			taskList.add(t);			
+		}
+		insert tasklist;
+		
+		list<Opportunity> queryOpp = [SELECT Id, Next_Move_ID__c, Last_Move_Id__c, Next_Move_Subject__c, Last_Move_Subject__c FROM Opportunity WHERE Id=:opp.id];
+		system.debug('Results!'+queryOpp);
+		system.assertEquals('subject5',queryOpp[0].Last_Move_Subject__c);
+		system.assert(queryOpp[0].Last_Move_Id__c!=NULL);
+		system.assertEquals('subject0',queryOpp[0].Next_Move_Subject__c);
+		system.assert(queryOpp[0].Next_Move_ID__c!=NULL);
+	}
 	
 	static testmethod void insertTeamMemberManager() {
 		Contact donor = new Contact(

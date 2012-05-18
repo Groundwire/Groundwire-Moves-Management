@@ -27,7 +27,6 @@ public with sharing class MovesManagement {
 				update consToUpdate;
 			}
 		}
-		
 	}
 
 	
@@ -49,6 +48,28 @@ public with sharing class MovesManagement {
 		for (Contact c:consWithNewMovesManager) {
 			if (ownersToUpdate.containsKey(c.Moves_Manager__c)) {
 				c.OwnerId = ownersToUpdate.get(c.Moves_Manager__c);
+			}
+		}
+	}
+
+	public void updateAccountOwnerToMovesManager(list<Account> accsWithNewMovesManager) {
+		set<id> movesManagers = new set<id>();
+		map<Id,Id> ownersToUpdate = new map<Id,Id>();
+		
+		//compile list of ContactIDs of Moves Managers
+		for (Account a:accsWithNewMovesManager) {
+			movesManagers.add(a.Moves_Manager__c);
+		}
+		
+		//Make map of ContactId to UserId of Moves Managers with associated users
+		for (Contact c:[SELECT Id, User__c FROM Contact WHERE User__c!=null AND Id IN :movesManagers]) {
+			ownersToUpdate.put(c.Id,c.User__c);
+		}
+		
+		//Update OwnerID with Moves Manager User
+		for (Account a:accsWithNewMovesManager) {
+			if (ownersToUpdate.containsKey(a.Moves_Manager__c)) {
+				a.OwnerId = ownersToUpdate.get(a.Moves_Manager__c);
 			}
 		}
 	}
@@ -502,6 +523,30 @@ public with sharing class MovesManagement {
 		update donor;
 		
 		list<Contact> queryDonor = [SELECT OwnerId FROM Contact WHERE ID=:donor.id];
+		system.assertEquals(queryDonor[0].OwnerId,movesManager.User__c,'Assigning a Moves Manager with an associated user account should transfer the Donor\'s owner.');
+	}
+	
+	static testmethod void updateAccountOwnerToMovesManager(){
+		User mmUser = [SELECT id FROM user WHERE IsActive=true AND Profile.Name='System Administrator' LIMIT 1];
+		system.assert(mmUser.id!=null,'Sys Admin User Account should not be null');
+		
+		Contact movesManager = new Contact(
+			FirstName = 'Mr.',
+			LastName = 'Burns',
+			User__c = mmUser.id,
+			On_Moves_Management_Team__c=true
+		);
+		insert movesManager;	
+		
+		Account donor = new Account(
+			Name = 'Springfield Nuclear Power Plant'
+		);
+		insert donor;
+		
+		donor.Moves_Manager__c = movesManager.id;
+		update donor;
+		
+		list<Account> queryDonor = [SELECT OwnerId FROM Account WHERE ID=:donor.id];
 		system.assertEquals(queryDonor[0].OwnerId,movesManager.User__c,'Assigning a Moves Manager with an associated user account should transfer the Donor\'s owner.');
 	}
 }

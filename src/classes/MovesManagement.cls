@@ -2,12 +2,13 @@ public with sharing class MovesManagement {
 	
 	static boolean updatingMovesManagementTeam = false;
 	
-	public void SetMovesManagerOnContact(list<Moves_Mgmt_Team_Member__c> listTeamMemberNew, list<Moves_Mgmt_Team_Member__c> listTeamMemberOld, 
+	public void SetMovesManagerOnDonor(list<Moves_Mgmt_Team_Member__c> listTeamMemberNew, list<Moves_Mgmt_Team_Member__c> listTeamMemberOld, 
 										boolean isInsertOrUpdate, boolean isDelete) {
 		
 		//only exercise this code if we haven't just fired a trigger to set the moves manager on contact from the team member object
 		if (!updatingMovesManagementTeam) {
 			list<Contact> consToUpdate = new list<Contact>();
+			list<Account> accsToUpdate = new list<Account>();
 			
 			for (Moves_Mgmt_Team_Member__c tm : (isInsertOrUpdate ? listTeamMemberNew : listTeamMemberOld)) {
 				//if this team member is listed as the moves manager, update the contact lookup
@@ -18,6 +19,12 @@ public with sharing class MovesManagement {
 						Moves_Manager__c = isInsertOrUpdate ? tm.Team_Member__c : null //if it's not an insert, it's a delete and we want to null out the Moves Manager field on Contact
 						);
 					consToUpdate.add(c);
+				} else if (tm.Moves_Manager__c && tm.Donor_Org__c != null) {
+					Account a = new Account(
+						id = tm.Donor_Org__c,
+						Moves_Manager__c = isInsertOrUpdate ? tm.Team_Member__c : null //if it's not an insert, it's a delete and we want to null out the Moves Manager field on Contact
+					);
+					accsToUpdate.add(a);
 				}
 			}
 			
@@ -26,17 +33,20 @@ public with sharing class MovesManagement {
 				updatingMovesManagementTeam = true;
 				update consToUpdate;
 			}
+			if (!accsToUpdate.isEmpty()) {
+				updatingMovesManagementTeam = true;
+				update accsToUpdate;
+			}
 		}
 	}
 
-	
-	public void updateContactOwnerToMovesManager(list<Contact> consWithNewMovesManager) {
+	public void updateOwnerToMovesManager(list<sObject> sObjectsWithNewMovesManager) {
 		set<id> movesManagers = new set<id>();
 		map<Id,Id> ownersToUpdate = new map<Id,Id>();
 		
 		//compile list of ContactIDs of Moves Managers
-		for (Contact c:consWithNewMovesManager) {
-			movesManagers.add(c.Moves_Manager__c);
+		for (sObject c:sObjectsWithNewMovesManager) {
+			movesManagers.add((id)c.get('Moves_Manager__c'));
 		}
 		
 		//Make map of ContactId to UserId of Moves Managers with associated users
@@ -45,49 +55,31 @@ public with sharing class MovesManagement {
 		}
 		
 		//Update OwnerID with Moves Manager User
-		for (Contact c:consWithNewMovesManager) {
-			if (ownersToUpdate.containsKey(c.Moves_Manager__c)) {
-				c.OwnerId = ownersToUpdate.get(c.Moves_Manager__c);
-			}
-		}
-	}
-
-	public void updateAccountOwnerToMovesManager(list<Account> accsWithNewMovesManager) {
-		set<id> movesManagers = new set<id>();
-		map<Id,Id> ownersToUpdate = new map<Id,Id>();
-		
-		//compile list of ContactIDs of Moves Managers
-		for (Account a:accsWithNewMovesManager) {
-			movesManagers.add(a.Moves_Manager__c);
-		}
-		
-		//Make map of ContactId to UserId of Moves Managers with associated users
-		for (Contact c:[SELECT Id, User__c FROM Contact WHERE User__c!=null AND Id IN :movesManagers]) {
-			ownersToUpdate.put(c.Id,c.User__c);
-		}
-		
-		//Update OwnerID with Moves Manager User
-		for (Account a:accsWithNewMovesManager) {
-			if (ownersToUpdate.containsKey(a.Moves_Manager__c)) {
-				a.OwnerId = ownersToUpdate.get(a.Moves_Manager__c);
+		for (sObject c:sObjectsWithNewMovesManager) {
+			if (ownersToUpdate.containsKey((id)c.get('Moves_Manager__c'))) {
+				c.put('OwnerId', ownersToUpdate.get((id)c.get('Moves_Manager__c')));
 			}
 		}
 	}
 	
-	public void SetMovesManagerOnTeamMember(map<id,Contact> conMap, map<id,contact> oldMap, boolean isUpdate) {
+	
+	public void SetMovesManagerOnTeamMember(map<id,sObject> conMap, map<id,sObject> oldMap, boolean isUpdate) {
 		
 		//only exercise this code if we haven't just fired a trigger to set the moves manager on contact from the team member object
 		if (!updatingMovesManagementTeam) {
 			
+			//boolean to differentiate Account and Contact sObjects
+			boolean sObjectIsContact = ((string)conMap.values()[0].get('id')).startswith('003');
+
 			// map of contact id to all team members related to that contact
 			map<id,set<Moves_Mgmt_Team_Member__c>> conIdToTeamMap = new map<id,set<Moves_Mgmt_Team_Member__c>>();
 			
 			// first we need to find all of the related team members for each contact in the trigger set, so we know whether to update an 
 			// existing team member record or create a new one
-			for (Contact c : conMap.values()) {
+			for (sObject c : conMap.values()) {
 				//only create or update team member records if Moves Manager lookup is populated or was just blanked out with an update
-				if ((!isUpdate && c.Moves_Manager__c != null) || (isUpdate && c.Moves_Manager__c != oldMap.get(c.id).Moves_Manager__c)) {
-					conIdToTeamMap.put(c.id,new set<Moves_Mgmt_Team_Member__c>());
+				if ((!isUpdate && c.get('Moves_Manager__c') != null) || (isUpdate && c.get('Moves_Manager__c') != oldMap.get((id)c.get('id')).get('Moves_Manager__c'))) {
+					conIdToTeamMap.put((id)c.get('id'),new set<Moves_Mgmt_Team_Member__c>());
 				}
 			}
 			
@@ -97,9 +89,17 @@ public with sharing class MovesManagement {
 				list<Moves_Mgmt_Team_Member__c> teamMembersToCreate = new list<Moves_Mgmt_Team_Member__c>();
 				list<Moves_Mgmt_Team_Member__c> teamMembersToUpdate = new list<Moves_Mgmt_Team_Member__c>();
 				
-				for (Moves_Mgmt_Team_Member__c tm : [SELECT id, Moves_Manager__c, Team_Member__c, Donor_Contact__c FROM Moves_Mgmt_Team_Member__c
-														WHERE Donor_Contact__c IN :conIdToTeamMap.keyset() ]) {
-					conIdToTeamMap.get(tm.Donor_Contact__c).add(tm);
+				//if the sObjects are contacts, use the contact lookup on MMTM, otherwise use the Account lookup
+				if (sObjectIsContact) {
+					for (Moves_Mgmt_Team_Member__c tm : [SELECT id, Moves_Manager__c, Team_Member__c, Donor_Contact__c FROM Moves_Mgmt_Team_Member__c
+															WHERE Donor_Contact__c IN :conIdToTeamMap.keyset() ]) {
+						conIdToTeamMap.get(tm.Donor_Contact__c).add(tm);
+					}
+				} else {
+					for (Moves_Mgmt_Team_Member__c tm : [SELECT id, Moves_Manager__c, Team_Member__c, Donor_Contact__c FROM Moves_Mgmt_Team_Member__c
+															WHERE Donor_Org__c IN :conIdToTeamMap.keyset() ]) {
+						conIdToTeamMap.get(tm.Donor_Contact__c).add(tm);
+					}					
 				}
 				
 				// now loop back through the map and update or create team member records as needed to reflect
@@ -108,15 +108,15 @@ public with sharing class MovesManagement {
 					// if we don't have any existing team member records, we need to create one
 					boolean createTeamMemberRecord = true;
 					for (Moves_Mgmt_Team_Member__c tm : conIdToTeamMap.get(cid)) {
-						if (tm.Team_Member__c == conMap.get(cid).Moves_Manager__c && tm.Moves_Manager__c) {
+						if (tm.Team_Member__c == conMap.get(cid).get('Moves_Manager__c') && tm.Moves_Manager__c) {
 							//we already have the correct team manager
 							createTeamMemberRecord = false;
 							break;
-						} else if (tm.Team_Member__c != conMap.get(cid).Moves_Manager__c && tm.Moves_Manager__c) {
+						} else if (tm.Team_Member__c != conMap.get(cid).get('Moves_Manager__c') && tm.Moves_Manager__c) {
 							//there is a team member record with another Moves Manager marked, and we need to unmark and update that record	
 							tm.Moves_Manager__c = false;
 							teamMembersToUpdate.add(tm);
-						} else if (tm.Team_Member__c == conMap.get(cid).Moves_Manager__c && !tm.Moves_Manager__c) {
+						} else if (tm.Team_Member__c == conMap.get(cid).get('Moves_Manager__c') && !tm.Moves_Manager__c) {
 							//there is a team member record for this Moves Manager, but that record is marked as the Moves Manager yet, so mark it
 							tm.Moves_Manager__c = true;
 							teamMembersToUpdate.add(tm);
@@ -126,10 +126,11 @@ public with sharing class MovesManagement {
 					
 					if (createTeamMemberRecord) {
 						Moves_Mgmt_Team_Member__c tm = new Moves_Mgmt_Team_Member__c(
-							Donor_Contact__c = cid,
-							Team_Member__c = conMap.get(cid).Moves_Manager__c,
+							Team_Member__c = (id)conMap.get(cid).get('Moves_Manager__c'),
 							Moves_Manager__c = true
 						);
+						if (sObjectIsContact) tm.Donor_Contact__c = cid;
+						else tm.Donor_Org__c = cid;
 						teamMembersToCreate.add(tm);
 					}
 				}
@@ -148,47 +149,74 @@ public with sharing class MovesManagement {
 		}
 		
 	}
+
 	
 	public void addTeamToOppContactRoles(list<Opportunity> opps) {
 		
-		//first check to see if we're in GWBase, because GWBase has a lookup to Contact on Opp, otherwise we can't do this logic
-		Schema.SObjectType token = Schema.getGlobalDescribe().get('GWBase__ONEN_Household__c');
-		if (token != null) {				
-			
-			map<id,set<id>> conIdToTeamMap = new map<id,set<id>>();
-			map<id,id> conIdToMovesManagerMap = new map<id,id>();
-			list<Opportunity> oppsToProcess = new list<Opportunity>();
-			
-			for (Opportunity o : opps) {
-				if (o.get('GWBase__ContactId__c') != null) {
-					conIdToTeamMap.put((id)o.get('GWBase__ContactId__c'),new set<id>());
-					oppsToProcess.add(o);
-				}
-			}
-			
-			//now go query for all of the team members for each major donor and build out the map
-			for (Moves_Mgmt_Team_Member__c tm : [SELECT id, Moves_Manager__c, Team_Member__c, Donor_Contact__c FROM Moves_Mgmt_Team_Member__c
-														WHERE Donor_Contact__c IN :conIdToTeamMap.keyset() ]) {
-											
-				if (!tm.Moves_Manager__c) {
-					conIdToTeamMap.get(tm.Donor_Contact__c).add(tm.Team_Member__c);
-				} else {
-					conIdToMovesManagerMap.put(tm.Donor_Contact__c,tm.Team_Member__c);
-				}
+		map<id,set<id>> idToTeamMap = new map<id,set<id>>();
+		map<id,id> idToMovesManagerMap = new map<id,id>();
+		list<OpportunityContactRole> ocrToCreate = new list<OpportunityContactRole>();
+		
+		for (Opportunity o : opps) {
+			if (o.get('GWBase__ContactId__c') != null) {
+				idToTeamMap.put((id)o.get('GWBase__ContactId__c'),new set<id>());
+			} else if (o.AccountId != null) {
+				idToTeamMap.put(o.AccountId, new set<id>());
 			}
 			
 		}
 		
+		//query for all of the team members for each major donor and build out the map
+		for (Moves_Mgmt_Team_Member__c tm : [SELECT id, Moves_Manager__c, Team_Member__c, Donor_Contact__c, Donor_Org__c FROM Moves_Mgmt_Team_Member__c
+													WHERE Donor_Contact__c IN :idToTeamMap.keyset() OR Donor_Org__c IN :idToTeamMap.keyset()]) {
+			id moved = tm.Donor_Org__c!=null?tm.Donor_Org__c:tm.Donor_Contact__c;
+			
+			if (!tm.Moves_Manager__c) {
+				idToTeamMap.get(moved).add(tm.Team_Member__c);
+			} else {
+				idToMovesManagerMap.put(moved,tm.Team_Member__c);	
+			}
+		}
+		
+		//loop through opps and build contact roles
+		for (Opportunity o : opps) {
+			id moved = o.AccountId!=null?o.AccountId:o.GWBase__ContactId__c;
+			if (idToTeamMap.containsKey(moved)) {
+				for (id i : idToTeamMap.get(moved)) {
+					OpportunityContactRole ocr = new OpportunityContactRole(
+						OpportunityId = o.id,
+						ContactId = i,
+						Role = 'Moves Management Team Member'
+					);
+					ocrToCreate.add(ocr);
+				}
+			}
+			
+			if (idToMovesManagerMap.containsKey(moved)) {
+				OpportunityContactRole ocr = new OpportunityContactRole(
+					OpportunityId = o.id,
+					ContactId = idToMovesManagerMap.get(moved),
+					Role = 'Moves Manager'
+					//isPrimary = true??
+				);
+				ocrToCreate.add(ocr);					
+			}
+			
+		}
+		if (!ocrToCreate.isEmpty()) {
+			insert ocrToCreate;
+		}
 	}
 	
 	public void movesOppRollup(set<id> oppsToRollup) {
+		//use oppToRollup instead of oppsThatExist.
 		map<id,Task> closedTaskMap = new map<id,Task>();
 		map<id,Task> openTaskMap = new map<id,Task>();
 		set<id> oppsThatExist = new set<id>();
 		list<Opportunity> oppsToUpdate = new list<Opportunity>();
 		
 		//loop through Closed tasks for our Opportunity records to roll up
-		for (Task t:[SELECT Id, WhatId, IsClosed, Subject FROM Task WHERE IsClosed=true AND WhatId IN :oppsToRollup ORDER BY ActivityDate DESC]) {
+		for (Task t:[SELECT Id, WhatId, IsClosed, Subject FROM Task WHERE ActivityDate!=NULL AND IsClosed=true AND WhatId IN :oppsToRollup ORDER BY ActivityDate DESC]) {
 			//take the most recently closed task by Activity date, add it to the closed task map
 			if (!closedTaskMap.containsKey(t.WhatId)) {
 				closedTaskMap.put(t.whatId,t);
@@ -197,7 +225,7 @@ public with sharing class MovesManagement {
 		}
 		
 		//loop through Open tasks for our Opportunity records to roll up
-		for (Task t:[SELECT Id, WhatId, IsClosed, Subject FROM Task WHERE IsClosed=false AND WhatId IN :oppsToRollup ORDER BY ActivityDate]) {
+		for (Task t:[SELECT Id, WhatId, IsClosed, Subject FROM Task WHERE ActivityDate!=NULL AND IsClosed=false AND WhatId IN :oppsToRollup ORDER BY ActivityDate]) {
 			//take the first open task by Activity date, add it to the open task map
 			if (!openTaskMap.containsKey(t.WhatId)) {
 				openTaskMap.put(t.whatId,t);
@@ -229,6 +257,13 @@ public with sharing class MovesManagement {
 		}
 	}
 	
+	//stamps Opportunity Stage onto a Task's Moves Management Stage when the task is marked as closed, if the stage wasn't set manually.
+	public void stampTaskOppStage(map<id,Task> oppsToStamp){
+		for (Opportunity o:[SELECT id, StageName FROM Opportunity WHERE id in :oppsToStamp.keyset()]) {
+			oppsToStamp.get(o.id).Moves_Management_Stage__c = o.StageName;
+		}
+	}
+
 	/****************************************
 	*				TESTS					*
 	****************************************/
@@ -242,7 +277,7 @@ public with sharing class MovesManagement {
 		insert donor;
 		
 		Opportunity opp = new Opportunity(
-			RecordTypeID = GWBase.GW_RecTypes.GetRecordTypeId('Opportunity','Major Donor'),
+			RecordTypeID = GWBase.GW_RecTypes.GetRecordTypeId('Opportunity','Major Donor')==null?null:GWBase.GW_RecTypes.GetRecordTypeId('Opportunity','Major Donor'),
 			Amount = 888888,
 			CloseDate = system.today().addDays(8),
 			StageName = GWBase.ONEN_Constants.OPP_DEFAULT_STAGE,
@@ -471,36 +506,6 @@ public with sharing class MovesManagement {
 		Test.stopTest();
 	}
 	
-	static testmethod void insertMMTeamConRolesOnOppInsert() {
-		Contact donor = new Contact(
-			FirstName = 'Homer',
-			LastName = 'Simpson',
-			Moves_Manager__c = null
-		);
-		insert donor;
-		
-		Contact movesManager = new Contact(
-			FirstName = 'Mr.',
-			LastName = 'Burns',
-			On_Moves_Management_Team__c=true
-		);
-		insert movesManager;
-		
-		Contact someOtherTeamMember = new Contact(
-			FirstName = 'Ned',
-			LastName = 'Flander',
-			On_Moves_Management_Team__c=true
-		);
-		insert someOtherTeamMember;
-		
-		Moves_Mgmt_Team_Member__c tm = new Moves_Mgmt_Team_Member__c(
-			Donor_Contact__c = donor.id,
-			Team_Member__c = someOtherTeamMember.id,
-			Moves_Manager__c = false
-		);
-		insert tm;
-	}
-	
 	static testmethod void updateContactOwnerToMovesManager(){
 		User mmUser = [SELECT id FROM user WHERE IsActive=true AND Profile.Name='System Administrator' LIMIT 1];
 		system.assert(mmUser.id!=null,'Sys Admin User Account should not be null');
@@ -548,5 +553,94 @@ public with sharing class MovesManagement {
 		
 		list<Account> queryDonor = [SELECT OwnerId FROM Account WHERE ID=:donor.id];
 		system.assertEquals(queryDonor[0].OwnerId,movesManager.User__c,'Assigning a Moves Manager with an associated user account should transfer the Donor\'s owner.');
+	}
+	
+	static testmethod void testTaskOppStageStamp() {
+		
+		Contact donor = new Contact(
+			FirstName = 'Homer',
+			LastName = 'Simpson',
+			Moves_Manager__c = null
+		);
+		insert donor;
+		
+		Opportunity opp = new Opportunity(
+			RecordTypeID = GWBase.GW_RecTypes.GetRecordTypeId('Opportunity','Major Donor')==null?null:GWBase.GW_RecTypes.GetRecordTypeId('Opportunity','Major Donor'),
+			Amount = 888888,
+			CloseDate = system.today().addDays(8),
+			StageName = 'Cultivating',
+			GWBase__CR_Contact_Id__c = donor.id,
+			GWBase__ContactId__c = donor.id
+		);
+		insert opp;
+		
+		Task t = new Task(
+			WhoId = donor.id,
+			WhatId = opp.id,
+			Subject = 'subject',
+			ActivityDate = system.today()
+		);
+		insert t;
+		
+		Task querytask = [SELECT id, Moves_Management_Stage__c FROM Task WHERE Id=:t.id];
+		system.assertEquals(querytask.Moves_Management_Stage__c,null,'Task should not be stamped with Opp Stage until it is closed');
+		
+		//set task to closed status
+		TaskStatus closedtaskstatus = [SELECT MasterLabel, IsClosed from TaskStatus WHERE IsClosed=true LIMIT 1];
+		t.Status = closedtaskstatus.MasterLabel;
+		
+		update t;
+		
+		querytask = [SELECT id, Moves_Management_Stage__c FROM Task WHERE Id=:t.id];
+		system.assertEquals(querytask.Moves_Management_Stage__c, 'Cultivating');
+		
+	}
+	
+	static testmethod void testTeamOppConRoles() {
+
+		Contact movesManager = new Contact(
+			FirstName = 'Mr.',
+			LastName = 'Burns',
+			On_Moves_Management_Team__c=true
+		);
+		insert movesManager;
+
+		Contact donor = new Contact(
+			FirstName = 'Homer',
+			LastName = 'Simpson',
+			Moves_Manager__c = movesManager.id
+		);
+		insert donor;
+		
+		Contact someOtherTeamMember = new Contact(
+			FirstName = 'Ned',
+			LastName = 'Flander',
+			On_Moves_Management_Team__c=true
+		);
+		insert someOtherTeamMember;
+		
+		Moves_Mgmt_Team_Member__c tm = new Moves_Mgmt_Team_Member__c(
+			Donor_Contact__c = donor.id,
+			Team_Member__c = someOtherTeamMember.id,
+			Moves_Manager__c = false
+		);
+		insert tm;
+		
+		test.starttest();
+		Opportunity opp = new Opportunity(
+			RecordTypeID = GWBase.GW_RecTypes.GetRecordTypeId('Opportunity','Major Donor')==null?null:GWBase.GW_RecTypes.GetRecordTypeId('Opportunity','Major Donor'),
+			Amount = 888888,
+			CloseDate = system.today().addDays(8),
+			StageName = GWBase.ONEN_Constants.OPP_DEFAULT_STAGE,
+			GWBase__CR_Contact_Id__c = donor.id,
+			GWBase__CR_Contact_Role__c = 'Major Donor',
+			GWBase__ContactId__c = donor.id
+		);
+		insert opp;
+		test.stoptest();
+		
+		list<OpportunityContactRole> queryOCR = [SELECT Id, Contact.Name, Role, IsPrimary FROM OpportunityContactRole WHERE OpportunityId=:opp.id];
+		system.assertEquals(3,queryOCR.size(),'OpportunityContactRoles should be created for all Moves Management Team Members');
+
 	}
 }

@@ -44,6 +44,30 @@
             <default>false</default>
         </values>
     </businessProcesses>
+    <businessProcesses>
+        <fullName>Major Gift Moves Management</fullName>
+        <isActive>true</isActive>
+        <values>
+            <fullName>Closed Lost</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Closed Won</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Cultivating</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Prospecting</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Won%2C Not Thanked</fullName>
+            <default>false</default>
+        </values>
+    </businessProcesses>
     <enableFeeds>true</enableFeeds>
     <fields>
         <fullName>CurrentGenerators__c</fullName>
@@ -162,6 +186,49 @@
         <required>false</required>
         <type>Text</type>
         <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>GWBase__Commemoration_Name__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>The name of the person being commemorated In Honor Of or In Memory Of with this opportunity</inlineHelpText>
+        <label>Commemoration Name</label>
+        <length>255</length>
+        <required>false</required>
+        <trackFeedHistory>false</trackFeedHistory>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>GWBase__Commemoration_Special_Instructions__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>If this opportunity represents a commemoration, this indicates the special instructions associated with honoring or memorializing this person.</inlineHelpText>
+        <label>Commemoration Special Instructions</label>
+        <length>32768</length>
+        <trackFeedHistory>false</trackFeedHistory>
+        <type>LongTextArea</type>
+        <visibleLines>4</visibleLines>
+    </fields>
+    <fields>
+        <fullName>GWBase__Commemoration_Type__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>If this opportunity represents a commemoration, this indicates the type of commemoration.  In Honor Of a living person or In Memory Of a deceased person. To connect this commemoration to a real contact in Salesforce, create a Contact Role of Honoree</inlineHelpText>
+        <label>Commemoration Type</label>
+        <picklist>
+            <picklistValues>
+                <fullName>In Honor Of</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>In Memory Of</fullName>
+                <default>false</default>
+            </picklistValues>
+            <sorted>false</sorted>
+        </picklist>
+        <trackFeedHistory>false</trackFeedHistory>
+        <type>Picklist</type>
     </fields>
     <fields>
         <fullName>GWBase__ContactId__c</fullName>
@@ -467,6 +534,28 @@
         <type>Currency</type>
     </fields>
     <fields>
+        <fullName>Last_Move_Id__c</fullName>
+        <externalId>false</externalId>
+        <inlineHelpText>The Id of the last completed move for this Opportunity.</inlineHelpText>
+        <label>Last Move Id</label>
+        <length>18</length>
+        <required>false</required>
+        <trackFeedHistory>false</trackFeedHistory>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Last_Move_Subject__c</fullName>
+        <externalId>false</externalId>
+        <inlineHelpText>The Subject of the last completed move for this Opportunity.</inlineHelpText>
+        <label>Last Move Subject</label>
+        <length>255</length>
+        <required>false</required>
+        <trackFeedHistory>false</trackFeedHistory>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
         <fullName>LeadSource</fullName>
         <picklist>
             <picklistValues>
@@ -498,6 +587,28 @@
         <externalId>false</externalId>
         <label>Main Competitor(s)</label>
         <length>100</length>
+        <required>false</required>
+        <trackFeedHistory>false</trackFeedHistory>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Next_Move_ID__c</fullName>
+        <externalId>false</externalId>
+        <inlineHelpText>The ID of the next Moves Management task for this Opportunity that isn&apos;t completed.</inlineHelpText>
+        <label>Next Move ID</label>
+        <length>18</length>
+        <required>false</required>
+        <trackFeedHistory>false</trackFeedHistory>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Next_Move_Subject__c</fullName>
+        <externalId>false</externalId>
+        <inlineHelpText>The Subject of the next Moves Management task for this Opportunity that isn&apos;t completed.</inlineHelpText>
+        <label>Next Move Subject</label>
+        <length>255</length>
         <required>false</required>
         <trackFeedHistory>false</trackFeedHistory>
         <type>Text</type>
@@ -618,6 +729,14 @@
                 <default>false</default>
                 <forecastCategory>Pipeline</forecastCategory>
                 <probability>90</probability>
+                <won>false</won>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Cultivating</fullName>
+                <closed>false</closed>
+                <default>false</default>
+                <forecastCategory>Pipeline</forecastCategory>
+                <probability>50</probability>
                 <won>false</won>
             </picklistValues>
             <sorted>false</sorted>
@@ -1260,6 +1379,117 @@
             </values>
         </picklistValues>
     </recordTypes>
+    <recordTypes>
+        <fullName>Major_Donor</fullName>
+        <active>true</active>
+        <businessProcess>GWBase__Gift</businessProcess>
+        <label>Major Donor</label>
+        <picklistValues>
+            <picklist>DeliveryInstallationStatus__c</picklist>
+            <values>
+                <fullName>Completed</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>In progress</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Yet to begin</fullName>
+                <default>false</default>
+            </values>
+        </picklistValues>
+        <picklistValues>
+            <picklist>ForecastCategoryName</picklist>
+            <values>
+                <fullName>Best Case</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Closed</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Commit</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Omitted</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Pipeline</fullName>
+                <default>false</default>
+            </values>
+        </picklistValues>
+        <picklistValues>
+            <picklist>GWBase__Fund__c</picklist>
+            <values>
+                <fullName>General Fund</fullName>
+                <default>false</default>
+            </values>
+        </picklistValues>
+        <picklistValues>
+            <picklist>GWBase__Member_Level__c</picklist>
+            <values>
+                <fullName>Bronze</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Gold</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Silver</fullName>
+                <default>false</default>
+            </values>
+        </picklistValues>
+        <picklistValues>
+            <picklist>GWBase__Membership_Origin__c</picklist>
+            <values>
+                <fullName>New</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Reacquire</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Renewal</fullName>
+                <default>false</default>
+            </values>
+        </picklistValues>
+        <picklistValues>
+            <picklist>GWBase__Restriction__c</picklist>
+            <values>
+                <fullName>Unrestricted</fullName>
+                <default>true</default>
+            </values>
+        </picklistValues>
+        <picklistValues>
+            <picklist>LeadSource</picklist>
+            <values>
+                <fullName>Other</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Partner Referral</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Phone Inquiry</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Purchased List</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Web</fullName>
+                <default>false</default>
+            </values>
+        </picklistValues>
+    </recordTypes>
     <validationRules>
         <fullName>GWBase__Must_choose_Organization_or_Primary_Con</fullName>
         <active>true</active>
@@ -1367,5 +1597,16 @@
         <page>GWBase__opportunitiesMarkAsWon</page>
         <protected>false</protected>
         <requireRowSelection>true</requireRowSelection>
+    </webLinks>
+    <webLinks>
+        <fullName>New_Move</fullName>
+        <availability>online</availability>
+        <displayType>button</displayType>
+        <height>600</height>
+        <linkType>page</linkType>
+        <masterLabel>New Move</masterLabel>
+        <openType>sidebar</openType>
+        <page>NewMove</page>
+        <protected>false</protected>
     </webLinks>
 </CustomObject>

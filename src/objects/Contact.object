@@ -1154,6 +1154,76 @@ IF ( AND ( OtherStreet = &quot;&quot; , OtherCity = &quot;&quot; , OtherState = 
         <unique>false</unique>
     </fields>
     <fields>
+        <fullName>GWBase__Recurring_Amount__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>The recurring amount received each recurring pay period. For a contact who pays $10 per month to your organization, this value would be $10.</inlineHelpText>
+        <label>Recurring Amount</label>
+        <precision>8</precision>
+        <required>false</required>
+        <scale>2</scale>
+        <trackFeedHistory>false</trackFeedHistory>
+        <type>Currency</type>
+    </fields>
+    <fields>
+        <fullName>GWBase__Recurring_Annualized_Amount__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <formula>IF( AND( NOT( ISBLANK( GWBase__Recurring_Amount__c ) ),NOT( ISBLANK(  GWBase__Recurring_Payment_Frequency__c  ) ),NOT( ISBLANK(  TEXT(GWBase__Recurring_Payment_Period__c)  ) ) ),
+
+IF(TEXT(GWBase__Recurring_Payment_Period__c) = &apos;Day&apos;, GWBase__Recurring_Amount__c * (365/GWBase__Recurring_Payment_Frequency__c),IF(TEXT(GWBase__Recurring_Payment_Period__c) = &apos;Week&apos;, GWBase__Recurring_Amount__c * (52/GWBase__Recurring_Payment_Frequency__c),IF(TEXT(GWBase__Recurring_Payment_Period__c) = &apos;Month&apos;, GWBase__Recurring_Amount__c * (12/GWBase__Recurring_Payment_Frequency__c),GWBase__Recurring_Amount__c * (1/GWBase__Recurring_Payment_Frequency__c)))),
+
+null)</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <inlineHelpText>Specifies the annualized total from a recurring payment profile associated with this contact. e.g. for a contact who gives $10 per month, this value would be $120</inlineHelpText>
+        <label>Recurring Annualized Amount</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>2</scale>
+        <type>Currency</type>
+    </fields>
+    <fields>
+        <fullName>GWBase__Recurring_Payment_Frequency__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>Specifies the time between recurring payments in the Recurring Payment Frequency and Recurring Payment Period fields (e.g. every 2 weeks, every 1 month).</inlineHelpText>
+        <label>Recurring Payment Frequency</label>
+        <precision>3</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackFeedHistory>false</trackFeedHistory>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>GWBase__Recurring_Payment_Period__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>Specifies the time between recurring payments in the Recurring Payment Frequency and Recurring Payment Period fields (e.g. every 2 weeks, every 1 month).</inlineHelpText>
+        <label>Recurring Payment Period</label>
+        <picklist>
+            <picklistValues>
+                <fullName>Day</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Week</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Month</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Year</fullName>
+                <default>false</default>
+            </picklistValues>
+            <sorted>false</sorted>
+        </picklist>
+        <trackFeedHistory>false</trackFeedHistory>
+        <type>Picklist</type>
+    </fields>
+    <fields>
         <fullName>GWBase__SecondContactEmail__c</fullName>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
@@ -1510,6 +1580,23 @@ IF ( AND ( OtherStreet = &quot;&quot; , OtherCity = &quot;&quot; , OtherState = 
         <label>Engagement Level</label>
     </listViews>
     <listViews>
+        <fullName>Moves_Management_Team</fullName>
+        <columns>FULL_NAME</columns>
+        <columns>User__c</columns>
+        <columns>ACCOUNT.NAME</columns>
+        <columns>CONTACT.TITLE</columns>
+        <columns>CONTACT.PHONE1</columns>
+        <columns>CONTACT.EMAIL</columns>
+        <columns>CORE.USERS.ALIAS</columns>
+        <filterScope>Everything</filterScope>
+        <filters>
+            <field>On_Moves_Management_Team__c</field>
+            <operation>equals</operation>
+            <value>1</value>
+        </filters>
+        <label>Moves Management Team</label>
+    </listViews>
+    <listViews>
         <fullName>MyContacts</fullName>
         <filterScope>Mine</filterScope>
         <label>My Contacts</label>
@@ -1535,18 +1622,30 @@ IF ( AND ( OtherStreet = &quot;&quot; , OtherCity = &quot;&quot; , OtherState = 
         <label>New This Week</label>
     </listViews>
     <namedFilters>
+        <fullName>Account_00NE0000001BUwEMAW</fullName>
+        <active>true</active>
+        <field>Account.Moves_Manager__c</field>
+        <filterItems>
+            <field>Contact.On_Moves_Management_Team__c</field>
+            <operation>equals</operation>
+            <value>True</value>
+        </filterItems>
+        <infoMessage>Only Moves Management team members are available. To make someone a Moves Management team member, check the &quot;On Moves Management Team&quot; box on their Contact record.</infoMessage>
+        <isOptional>false</isOptional>
+        <name>Account_Moves Manager</name>
+    </namedFilters>
+    <namedFilters>
         <fullName>Contact_00NE0000000ln8CMAQ</fullName>
         <active>true</active>
         <field>Contact.Moves_Manager__c</field>
         <filterItems>
-            <field>$Source.On_Moves_Management_Team__c</field>
+            <field>Contact.On_Moves_Management_Team__c</field>
             <operation>equals</operation>
             <value>True</value>
         </filterItems>
         <infoMessage>Only Moves Management team members are available. To make someone a Moves Management team member, check the &quot;On Moves Management Team&quot; box on their Contact record.</infoMessage>
         <isOptional>false</isOptional>
         <name>Contact_Moves Manager</name>
-        <sourceObject>Contact</sourceObject>
     </namedFilters>
     <namedFilters>
         <fullName>nf_01IE0000000PyUQMA0_00NE0000000ln86MAA</fullName>

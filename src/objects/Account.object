@@ -85,7 +85,7 @@
         <defaultValue>0</defaultValue>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <label>Average Gift</label>
+        <label>Org Average Gift</label>
         <precision>16</precision>
         <required>false</required>
         <scale>2</scale>
@@ -118,7 +118,7 @@
         <fullName>GWBase__FirstCloseDate__c</fullName>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <label>First Gift Date</label>
+        <label>Org First Gift Date</label>
         <required>false</required>
         <trackFeedHistory>false</trackFeedHistory>
         <type>Date</type>
@@ -186,7 +186,7 @@
         <defaultValue>0</defaultValue>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <label>Largest Gift</label>
+        <label>Org Largest Gift</label>
         <precision>16</precision>
         <required>false</required>
         <scale>2</scale>
@@ -197,7 +197,7 @@
         <fullName>GWBase__LastCloseDate__c</fullName>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <label>Last Gift Date</label>
+        <label>Org Last Gift Date</label>
         <required>false</required>
         <trackFeedHistory>false</trackFeedHistory>
         <type>Date</type>
@@ -207,7 +207,7 @@
         <defaultValue>0</defaultValue>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <label>Last Membership Amount</label>
+        <label>Org Last Membership Amount</label>
         <precision>16</precision>
         <required>false</required>
         <scale>2</scale>
@@ -218,7 +218,7 @@
         <fullName>GWBase__LastMembershipDate__c</fullName>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <label>Last Membership Date</label>
+        <label>Org Last Membership Date</label>
         <required>false</required>
         <trackFeedHistory>false</trackFeedHistory>
         <type>Date</type>
@@ -227,7 +227,7 @@
         <fullName>GWBase__LastMembershipLevel__c</fullName>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <label>Last Membership Level</label>
+        <label>Org Last Membership Level</label>
         <length>255</length>
         <required>false</required>
         <trackFeedHistory>false</trackFeedHistory>
@@ -238,7 +238,7 @@
         <fullName>GWBase__LastMembershipOrigin__c</fullName>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <label>Last Membership Origin</label>
+        <label>Org Last Membership Origin</label>
         <length>255</length>
         <required>false</required>
         <trackFeedHistory>false</trackFeedHistory>
@@ -250,7 +250,7 @@
         <defaultValue>0</defaultValue>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <label>Last Gift Amount</label>
+        <label>Org Last Gift Amount</label>
         <precision>16</precision>
         <required>false</required>
         <scale>2</scale>
@@ -294,7 +294,7 @@
         <fullName>GWBase__MembershipEndDate__c</fullName>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <label>Membership End Date</label>
+        <label>Org Membership End Date</label>
         <required>false</required>
         <trackFeedHistory>false</trackFeedHistory>
         <type>Date</type>
@@ -303,7 +303,7 @@
         <fullName>GWBase__MembershipJoinDate__c</fullName>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <label>Membership Join Date</label>
+        <label>Org Membership Join Date</label>
         <required>false</required>
         <trackFeedHistory>false</trackFeedHistory>
         <type>Date</type>
@@ -314,7 +314,7 @@
         <externalId>false</externalId>
         <formula>if (  GWBase__MembershipEndDate__c  &lt;today(), if ( GWBase__MembershipEndDate__c  &gt; ( TODAY() -  $Setup.GWBase__OppRollupSettings__c.GWBase__Membership_Grace_Period__c  )  , &quot;Grace Period&quot; , &quot;Expired&quot;) , if(isnull(GWBase__MembershipEndDate__c ),&quot;&quot;,&quot;Current&quot;))</formula>
         <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
-        <label>Membership Status</label>
+        <label>Org Membership Status</label>
         <required>false</required>
         <type>Text</type>
         <unique>false</unique>
@@ -324,7 +324,7 @@
         <defaultValue>0</defaultValue>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <label>Total Number of Gifts</label>
+        <label>Org Total Number of Gifts</label>
         <precision>18</precision>
         <required>false</required>
         <scale>0</scale>
@@ -337,7 +337,7 @@
         <defaultValue>0</defaultValue>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <label>Number of Membership Gifts</label>
+        <label>Org Number of Membership Gifts</label>
         <precision>18</precision>
         <required>false</required>
         <scale>0</scale>
@@ -350,7 +350,7 @@
         <defaultValue>0</defaultValue>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <label>Total Gifts Two Years Ago</label>
+        <label>Org Total Gifts Two Years Ago</label>
         <precision>16</precision>
         <required>false</required>
         <scale>2</scale>
@@ -362,7 +362,7 @@
         <defaultValue>0</defaultValue>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <label>Total Gifts Last 365 Days</label>
+        <label>Org Total Gifts Last 365 Days</label>
         <precision>16</precision>
         <required>false</required>
         <scale>2</scale>
@@ -374,7 +374,7 @@
         <defaultValue>0</defaultValue>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <label>Total Gifts Last Year</label>
+        <label>Org Total Gifts Last Year</label>
         <precision>16</precision>
         <required>false</required>
         <scale>2</scale>
@@ -386,7 +386,7 @@
         <defaultValue>0</defaultValue>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <label>Total Gifts This Year</label>
+        <label>Org Total Gifts This Year</label>
         <precision>16</precision>
         <required>false</required>
         <scale>2</scale>
@@ -398,7 +398,7 @@
         <defaultValue>0</defaultValue>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <label>Number of Gifts Two Years Ago</label>
+        <label>Org Number of Gifts Two Years Ago</label>
         <precision>18</precision>
         <required>false</required>
         <scale>0</scale>
@@ -411,7 +411,7 @@
         <defaultValue>0</defaultValue>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <label>Number of Gifts Last 365 Days</label>
+        <label>Org Number of Gifts Last 365 Days</label>
         <precision>18</precision>
         <required>false</required>
         <scale>0</scale>
@@ -424,7 +424,7 @@
         <defaultValue>0</defaultValue>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <label>Number of Gifts Last Year</label>
+        <label>Org Number of Gifts Last Year</label>
         <precision>18</precision>
         <required>false</required>
         <scale>0</scale>
@@ -437,7 +437,7 @@
         <defaultValue>0</defaultValue>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <label>Number of Gifts This Year</label>
+        <label>Org Number of Gifts This Year</label>
         <precision>18</precision>
         <required>false</required>
         <scale>0</scale>
@@ -527,7 +527,7 @@
         <defaultValue>0</defaultValue>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <label>Smallest Gift</label>
+        <label>Org Smallest Gift</label>
         <precision>16</precision>
         <required>false</required>
         <scale>2</scale>
@@ -559,7 +559,7 @@
         <defaultValue>0</defaultValue>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <label>Total Membership Amount</label>
+        <label>Org Total Membership Amount</label>
         <precision>16</precision>
         <required>false</required>
         <scale>2</scale>
@@ -571,7 +571,7 @@
         <defaultValue>0</defaultValue>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <label>Total Gifts</label>
+        <label>Org Total Gifts</label>
         <precision>16</precision>
         <required>false</required>
         <scale>2</scale>
@@ -721,6 +721,18 @@
             <sorted>false</sorted>
         </picklist>
         <type>Picklist</type>
+    </fields>
+    <fields>
+        <fullName>Moves_Manager__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <externalId>false</externalId>
+        <label>Moves Manager</label>
+        <referenceTo>Contact</referenceTo>
+        <relationshipLabel>Organizational Donors Managed</relationshipLabel>
+        <relationshipName>Accounts</relationshipName>
+        <required>false</required>
+        <trackFeedHistory>false</trackFeedHistory>
+        <type>Lookup</type>
     </fields>
     <fields>
         <fullName>NumberofLocations__c</fullName>

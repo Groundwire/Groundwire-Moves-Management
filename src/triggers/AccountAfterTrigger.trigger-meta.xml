@@ -3,7 +3,7 @@
     <apiVersion>23.0</apiVersion>
     <packageVersions>
         <majorNumber>2</majorNumber>
-        <minorNumber>0</minorNumber>
+        <minorNumber>2</minorNumber>
         <namespace>GWBase</namespace>
     </packageVersions>
     <status>Active</status>

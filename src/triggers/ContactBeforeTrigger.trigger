@@ -9,6 +9,6 @@ trigger ContactBeforeTrigger on Contact (before insert, before update) {
 	
 	if (contactsToProcess.size()>0) {
 		MovesManagement mm = new MovesManagement();     
-    	mm.updateContactOwnerToMovesManager(contactsToProcess);
+    	mm.updateOwnerToMovesManager(contactsToProcess);
 	}
 }

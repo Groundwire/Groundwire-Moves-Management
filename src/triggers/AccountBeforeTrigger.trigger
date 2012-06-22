@@ -10,6 +10,6 @@ trigger AccountBeforeTrigger on Account (before insert, before update) {
 	
 	if (accountsToProcess.size()>0) {
 		MovesManagement mm = new MovesManagement();     
-    	mm.updateAccountOwnerToMovesManager(accountsToProcess);
+    	mm.updateOwnerToMovesManager(accountsToProcess);
 	}
 }

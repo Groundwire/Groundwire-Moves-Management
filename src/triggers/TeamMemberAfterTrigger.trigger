@@ -2,6 +2,6 @@ trigger TeamMemberAfterTrigger on Moves_Mgmt_Team_Member__c (after delete, after
 after update) {
 	
 	MovesManagement mm = new MovesManagement();     
-    mm.SetMovesManagerOnContact(trigger.New, trigger.Old, (trigger.isInsert || trigger.isUndelete || trigger.isUpdate), trigger.isDelete); 
+    mm.SetMovesManagerOnDonor(trigger.New, trigger.Old, (trigger.isInsert || trigger.isUndelete || trigger.isUpdate), trigger.isDelete); 
 	
 }

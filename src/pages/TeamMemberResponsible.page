@@ -1,0 +1,8 @@
+<apex:page standardController="Task" extensions="EXT_TeamMemberResponsible" showheader="false" sidebar="false" title="Team Member Responsible">
+    <apex:form rendered="{!NOT(ISNULL(teamList))}">
+        <apex:selectList id="mgr" value="{!thisTask.Team_Member_Responsible_ID__c}" size="1" title="Team Member Responsible">
+            <apex:selectOptions value="{!teamList}"></apex:selectOptions>
+            <apex:actionSupport event="onchange" action="{!updTeamMember}" />
+        </apex:selectList>      
+    </apex:form>
+</apex:page>

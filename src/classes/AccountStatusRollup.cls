@@ -58,7 +58,7 @@ global with sharing class AccountStatusRollup extends DonorStatusRollup {
 	
 	static testmethod void testNew () {
 		Moves_Management_Settings__c mmsettings = new Moves_Management_Settings__c(
-			Opportunity_Record_Types__c = 'Gift'
+			Opportunity_Record_Types__c = 'Major Gift'
 		);
 		insert mmsettings;
 
@@ -71,7 +71,7 @@ global with sharing class AccountStatusRollup extends DonorStatusRollup {
 		
 		opportunity opp = new Opportunity(
 			Name = 'Huge Gift',
-			RecordTypeID = GWBase.GW_RecTypes.GetRecordTypeId('Opportunity','Gift'),
+			RecordTypeID = GWBase.GW_RecTypes.GetRecordTypeId('Opportunity','Major Gift'),
 			Amount = 88888888,
 			AccountId = acc.id,
 			StageName = 'Prospecting',
@@ -79,18 +79,13 @@ global with sharing class AccountStatusRollup extends DonorStatusRollup {
 		);
 		insert opp;
 		
-		Test.StartTest();
-		AccountStatusRollup rollup = new AccountStatusRollup(acc.id);
-		rollup.runRollups();
-		Test.StopTest();
-		
 		Account queryacc = [SELECT Moves_Management_Status__c FROM Account WHERE Id = :acc.id];
 		system.assertEquals(queryacc.Moves_Management_Status__c, 'Prospecting');
 	}
 	
 	static testmethod void testDropped () {
 		Moves_Management_Settings__c mmsettings = new Moves_Management_Settings__c(
-			Opportunity_Record_Types__c = 'Gift'
+			Opportunity_Record_Types__c = 'Major Gift'
 		);
 		insert mmsettings;
 
@@ -103,18 +98,13 @@ global with sharing class AccountStatusRollup extends DonorStatusRollup {
 		
 		opportunity opp = new Opportunity(
 			Name = 'Huge Gift',
-			RecordTypeID = GWBase.GW_RecTypes.GetRecordTypeId('Opportunity','Gift'),
+			RecordTypeID = GWBase.GW_RecTypes.GetRecordTypeId('Opportunity','Major Gift'),
 			Amount = 88888888,
 			AccountId = acc.id,
 			StageName = 'Prospecting',
 			CloseDate = system.today()
 		);
 		insert opp;
-		
-		Test.StartTest();
-		AccountStatusRollup rollup = new AccountStatusRollup(acc.id);
-		rollup.runRollups();
-		Test.StopTest();
 		
 		Account queryacc = [SELECT Moves_Management_Status__c FROM Account WHERE Id = :acc.id];
 		system.assertEquals('Dropped', queryacc.Moves_Management_Status__c);

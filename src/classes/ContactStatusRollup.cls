@@ -58,7 +58,7 @@ global with sharing class ContactStatusRollup extends DonorStatusRollup {
 	
 	static testmethod void testNew () {
 		Moves_Management_Settings__c mmsettings = new Moves_Management_Settings__c(
-			Opportunity_Record_Types__c = 'Gift'
+			Opportunity_Record_Types__c = 'Major Gift'
 		);
 		insert mmsettings;
 
@@ -71,7 +71,7 @@ global with sharing class ContactStatusRollup extends DonorStatusRollup {
 		
 		opportunity opp = new Opportunity(
 			Name = 'Huge Gift',
-			RecordTypeID = GWBase.GW_RecTypes.GetRecordTypeId('Opportunity','Gift'),
+			RecordTypeID = GWBase.GW_RecTypes.GetRecordTypeId('Opportunity','Major Gift'),
 			Amount = 88888888,
 			GWBase__ContactId__c = con.id,
 			StageName = 'Prospecting',
@@ -79,10 +79,6 @@ global with sharing class ContactStatusRollup extends DonorStatusRollup {
 		);
 		insert opp;
 		
-		Test.StartTest();
-		ContactStatusRollup rollup = new ContactStatusRollup(con.id);
-		rollup.runRollups();
-		Test.StopTest();
 		
 		Contact querycon = [SELECT Moves_Management_Status__c FROM Contact WHERE Id = :con.id];
 		system.assertEquals(querycon.Moves_Management_Status__c, 'Prospecting');
@@ -90,7 +86,7 @@ global with sharing class ContactStatusRollup extends DonorStatusRollup {
 	
 	static testmethod void testDropped () {
 		Moves_Management_Settings__c mmsettings = new Moves_Management_Settings__c(
-			Opportunity_Record_Types__c = 'Gift'
+			Opportunity_Record_Types__c = 'Major Gift'
 		);
 		insert mmsettings;
 
@@ -103,18 +99,13 @@ global with sharing class ContactStatusRollup extends DonorStatusRollup {
 		
 		opportunity opp = new Opportunity(
 			Name = 'Huge Gift',
-			RecordTypeID = GWBase.GW_RecTypes.GetRecordTypeId('Opportunity','Gift'),
+			RecordTypeID = GWBase.GW_RecTypes.GetRecordTypeId('Opportunity','Major Gift'),
 			Amount = 88888888,
 			GWBase__ContactId__c = con.id,
 			StageName = 'Prospecting',
 			CloseDate = system.today()
 		);
 		insert opp;
-		
-		Test.StartTest();
-		ContactStatusRollup rollup = new ContactStatusRollup(con.id);
-		rollup.runRollups();
-		Test.StopTest();
 		
 		Contact querycon = [SELECT Moves_Management_Status__c FROM Contact WHERE Id = :con.id];
 		system.assertEquals('Dropped', querycon.Moves_Management_Status__c);

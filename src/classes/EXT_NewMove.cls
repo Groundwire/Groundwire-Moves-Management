@@ -21,4 +21,52 @@ public with sharing class EXT_NewMove {
         
         return ref;
     }
+    
+    static testmethod void test() {
+		Contact movesManager = new Contact(
+			FirstName = 'Mr.',
+			LastName = 'Burns',
+			On_Moves_Management_Team__c=true
+		);
+		insert movesManager;
+
+		Contact donor = new Contact(
+			FirstName = 'Homer',
+			LastName = 'Simpson',
+			Moves_Manager__c = movesManager.id
+		);
+		insert donor;
+		
+		Contact someOtherTeamMember = new Contact(
+			FirstName = 'Ned',
+			LastName = 'Flander',
+			On_Moves_Management_Team__c=true
+		);
+		insert someOtherTeamMember;
+		
+		Moves_Mgmt_Team_Member__c tm = new Moves_Mgmt_Team_Member__c(
+			Donor_Contact__c = donor.id,
+			Team_Member__c = someOtherTeamMember.id,
+			Moves_Manager__c = false
+		);
+		insert tm;
+		
+		Opportunity opp = new Opportunity(
+			RecordTypeID = GWBase.GW_RecTypes.GetRecordTypeId('Opportunity','Major Donor')==null?null:GWBase.GW_RecTypes.GetRecordTypeId('Opportunity','Major Donor'),
+			Amount = 888888,
+			CloseDate = system.today().addDays(8),
+			StageName = GWBase.ONEN_Constants.OPP_DEFAULT_STAGE,
+			GWBase__CR_Contact_Id__c = donor.id,
+			GWBase__CR_Contact_Role__c = 'Major Donor',
+			GWBase__ContactId__c = donor.id
+		);
+		insert opp;
+    	
+		PageReference pageRef = page.NewMove;
+		test.setCurrentPageReference(pageRef);
+		
+		ApexPages.StandardController sc = new ApexPages.standardController(opp);
+		EXT_NewMove tmr = new EXT_NewMove(sc);
+		tmr.newTask();
+    }
 }

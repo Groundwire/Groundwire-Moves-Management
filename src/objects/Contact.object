@@ -1449,19 +1449,19 @@ null)</formula>
         <type>Currency</type>
     </fields>
     <fields>
-        <fullName>Major_Donor_Notes__c</fullName>
+        <fullName>Moves_Management_Notes__c</fullName>
         <externalId>false</externalId>
         <inlineHelpText>Take general notes about this donor our strategy here.</inlineHelpText>
-        <label>Major Donor Notes</label>
+        <label>Moves Management Notes</label>
         <length>20000</length>
         <trackFeedHistory>false</trackFeedHistory>
         <type>LongTextArea</type>
         <visibleLines>4</visibleLines>
     </fields>
     <fields>
-        <fullName>Major_Donor_Prospect_Rating__c</fullName>
+        <fullName>Moves_Management_Prospect_Rating__c</fullName>
         <externalId>false</externalId>
-        <label>Major Donor Prospect Rating</label>
+        <label>Moves Management Prospect Rating</label>
         <picklist>
             <picklistValues>
                 <fullName>Low</fullName>
@@ -1481,20 +1481,36 @@ null)</formula>
         <type>Picklist</type>
     </fields>
     <fields>
-        <fullName>Major_Donor_Status__c</fullName>
+        <fullName>Moves_Management_Status__c</fullName>
         <externalId>false</externalId>
-        <label>Major Donor Status</label>
+        <label>Moves Management Status</label>
         <picklist>
             <picklistValues>
                 <fullName>Prospect</fullName>
                 <default>false</default>
             </picklistValues>
             <picklistValues>
-                <fullName>Active</fullName>
+                <fullName>Qualified</fullName>
                 <default>false</default>
             </picklistValues>
             <picklistValues>
-                <fullName>Former</fullName>
+                <fullName>Cultivating</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Asking</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Asked</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Stewarding</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Dropped</fullName>
                 <default>false</default>
             </picklistValues>
             <sorted>false</sorted>

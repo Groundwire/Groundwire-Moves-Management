@@ -48,6 +48,14 @@
         <fullName>Major Gift Moves Management</fullName>
         <isActive>true</isActive>
         <values>
+            <fullName>Asked</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Asking</fullName>
+            <default>false</default>
+        </values>
+        <values>
             <fullName>Closed Lost</fullName>
             <default>false</default>
         </values>
@@ -61,6 +69,10 @@
         </values>
         <values>
             <fullName>Prospecting</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Qualified</fullName>
             <default>false</default>
         </values>
         <values>
@@ -739,6 +751,30 @@
                 <probability>50</probability>
                 <won>false</won>
             </picklistValues>
+            <picklistValues>
+                <fullName>Asking</fullName>
+                <closed>false</closed>
+                <default>false</default>
+                <forecastCategory>Pipeline</forecastCategory>
+                <probability>60</probability>
+                <won>false</won>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Asked</fullName>
+                <closed>false</closed>
+                <default>false</default>
+                <forecastCategory>Pipeline</forecastCategory>
+                <probability>70</probability>
+                <won>false</won>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Qualified</fullName>
+                <closed>false</closed>
+                <default>false</default>
+                <forecastCategory>Pipeline</forecastCategory>
+                <probability>15</probability>
+                <won>false</won>
+            </picklistValues>
             <sorted>false</sorted>
         </picklist>
         <type>Picklist</type>
@@ -1380,10 +1416,10 @@
         </picklistValues>
     </recordTypes>
     <recordTypes>
-        <fullName>Major_Donor</fullName>
+        <fullName>Major_Gift</fullName>
         <active>true</active>
-        <businessProcess>GWBase__Gift</businessProcess>
-        <label>Major Donor</label>
+        <businessProcess>Major Gift Moves Management</businessProcess>
+        <label>Major Gift</label>
         <picklistValues>
             <picklist>DeliveryInstallationStatus__c</picklist>
             <values>

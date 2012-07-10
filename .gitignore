@@ -62,3 +62,6 @@ src/objects/Lead.object
 .project
 .settings/
 Referenced Packages/
+src/objects/SnapshotAuditEvent.object
+src/objects/SnapshotBin.object
+src/objects/SnapshotConfig.object

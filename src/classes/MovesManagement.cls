@@ -1,6 +1,13 @@
-public with sharing class MovesManagement {
+public class MovesManagement {
 	
 	static boolean updatingMovesManagementTeam = false;
+	
+	public static Moves_Mgmt_Settings__c mmSettings;
+	public static set<id> movesRecordTypeIds;
+	public static set<string> movesRecordTypeNames;
+	public static boolean rectypesListEmpty = false;
+
+	
 	
 	public void SetMovesManagerOnDonor(list<Moves_Mgmt_Team_Member__c> listTeamMemberNew, list<Moves_Mgmt_Team_Member__c> listTeamMemberOld, 
 										boolean isInsertOrUpdate, boolean isDelete) {
@@ -263,12 +270,88 @@ public with sharing class MovesManagement {
 			oppsToStamp.get(o.id).Moves_Management_Stage__c = o.StageName;
 		}
 	}
+	
+	
+	public void getRectypeSettings () {
+		// grab settings if we haven't already
+		if (mmSettings == null) {
+			mmSettings = Moves_Mgmt_Settings__c.getOrgDefaults();
+			system.debug(LoggingLevel.WARN,'mmsettings in ismmopprectype' + mmsettings);
+
+			if (mmSettings.Opportunity_Record_Types__c == null) {
+				rectypesListEmpty = true;
+			}
+		}
+
+		// build our list of rectype id's if we haven't already
+		if (movesRecordTypeIds == null && !rectypesListEmpty) {
+			movesRecordTypeNames = new set<string>();
+			for (string s:mmsettings.Opportunity_Record_Types__c.split(';')) {
+				movesRecordTypeNames.add(s);
+			}
+			if (movesRecordTypeNames.size() > 0) {
+				movesRecordTypeIds = GWBase.GW_RecTypes.GetRecordTypeIdSet('Opportunity',movesRecordTypeNames);
+			}
+		}
+	}
+	
+	
+	public boolean isMMOppRectype (id oppRectypeID) {
+		// determine if the opp rectypeid passed is a moves mgmt opp, according to settings
+		getRectypeSettings(); 
+		if (movesRecordTypeIds != null) {
+			if (movesRecordTypeIds.contains(oppRectypeID)) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return false;			
+		}
+	}
 
 	/****************************************
 	*				TESTS					*
 	****************************************/
+
+	public static string oppRectypeIdForTests;
+	public static void setSettingsForTests () {
+		// use Major Gift as the default opp rectype if we actually have a rectype with that name
+		// otherwise, use a rectype at random that we do have
+		Moves_Mgmt_Settings__c settings = Moves_Mgmt_Settings__c.getOrgDefaults();
+		system.debug (Logginglevel.WARN, 'settings before update: ' + settings);
+		settings.Opportunity_Record_Types__c = defaultOppRectype('Major Gift');
+		upsert settings;
+		Moves_Mgmt_Settings__c[] settingsRecs = [SELECT Opportunity_Record_Types__c, SystemModstamp, SetupOwnerId, Name, LastModifiedDate, LastModifiedById, IsDeleted, Id, CreatedDate, CreatedById From Moves_Mgmt_Settings__c];
+		system.debug (Logginglevel.WARN, 'settings after update: ' + settingsRecs);
+		Moves_Mgmt_Settings__c setting2 = Moves_Mgmt_Settings__c.getOrgDefaults();
+		system.debug (Logginglevel.WARN, 'settings refetched via method: ' + setting2);
+	}
+
+	public static string defaultOppRectype (string tryFirst) {
+		// first try to find the rectype given in the param
+		// if not found, just take the first opp rectype we do find, at random
+		string rectypeName;
+		id tryID = GWBase.GW_RecTypes.GetRecordTypeId('Opportunity', tryFirst);
+		if (tryID == null) {
+			Map<String, Id> rectypeMap = GWBase.GW_RecTypes.GetRecordTypeIdMap('Opportunity');
+			// can't take first element of a set, so cast to a list
+			list<string> allRectypeNames = new list<string>();
+			allRectypeNames.addAll(rectypeMap.keyset());
+			rectypeName = allRectypeNames[0];
+			oppRectypeIdForTests = rectypeMap.get(rectypeName);
+		} else {
+			rectypeName = tryFirst;
+			oppRectypeIdForTests = tryID;
+		}
+		return rectypeName;
+	}
+
 	
 	static testmethod void testMovesRollups() {
+		
+		setSettingsForTests();
+		
 		Contact donor = new Contact(
 			FirstName = 'Homer',
 			LastName = 'Simpson',
@@ -277,7 +360,7 @@ public with sharing class MovesManagement {
 		insert donor;
 		
 		Opportunity opp = new Opportunity(
-			RecordTypeID = GWBase.GW_RecTypes.GetRecordTypeId('Opportunity','Major Donor')==null?null:GWBase.GW_RecTypes.GetRecordTypeId('Opportunity','Major Donor'),
+			RecordTypeID = oppRectypeIdForTests,
 			Amount = 888888,
 			CloseDate = system.today().addDays(8),
 			StageName = GWBase.ONEN_Constants.OPP_DEFAULT_STAGE,
@@ -318,6 +401,9 @@ public with sharing class MovesManagement {
 	}
 	
 	static testmethod void insertTeamMemberManager() {
+		
+		setSettingsForTests();
+		
 		Contact donor = new Contact(
 			FirstName = 'Homer',
 			LastName = 'Simpson',
@@ -372,6 +458,8 @@ public with sharing class MovesManagement {
 	}
 	
 	static testmethod void insertConWithManagerThatDoesNotExist() {
+		
+		setSettingsForTests();
 		
 		Contact movesManager = new Contact(
 			FirstName = 'Mr.',
@@ -431,6 +519,9 @@ public with sharing class MovesManagement {
 	}
 	
 	static testmethod void existingTeamManagerRecordConUpdate() {
+		
+		setSettingsForTests();
+		
 		Contact donor = new Contact(
 			FirstName = 'Homer',
 			LastName = 'Simpson',
@@ -466,6 +557,9 @@ public with sharing class MovesManagement {
 	}
 	
 	static testmethod void replaceCurrentTeamManager() {
+		
+		setSettingsForTests();
+		
 		Contact donor = new Contact(
 			FirstName = 'Homer',
 			LastName = 'Simpson',
@@ -507,6 +601,9 @@ public with sharing class MovesManagement {
 	}
 	
 	static testmethod void updateContactOwnerToMovesManager(){
+		
+		setSettingsForTests();
+		
 		User mmUser = [SELECT id FROM user WHERE IsActive=true AND Profile.Name='System Administrator' LIMIT 1];
 		system.assert(mmUser.id!=null,'Sys Admin User Account should not be null');
 		
@@ -557,6 +654,8 @@ public with sharing class MovesManagement {
 	
 	static testmethod void testTaskOppStageStamp() {
 		
+		setSettingsForTests();
+		
 		Contact donor = new Contact(
 			FirstName = 'Homer',
 			LastName = 'Simpson',
@@ -565,7 +664,7 @@ public with sharing class MovesManagement {
 		insert donor;
 		
 		Opportunity opp = new Opportunity(
-			RecordTypeID = GWBase.GW_RecTypes.GetRecordTypeId('Opportunity','Major Donor')==null?null:GWBase.GW_RecTypes.GetRecordTypeId('Opportunity','Major Donor'),
+			RecordTypeID = oppRectypeIdForTests,
 			Amount = 888888,
 			CloseDate = system.today().addDays(8),
 			StageName = 'Cultivating',
@@ -596,7 +695,10 @@ public with sharing class MovesManagement {
 		
 	}
 	
+
 	static testmethod void testTeamOppConRoles() {
+		
+		setSettingsForTests();
 
 		Contact movesManager = new Contact(
 			FirstName = 'Mr.',
@@ -628,7 +730,7 @@ public with sharing class MovesManagement {
 		
 		test.starttest();
 		Opportunity opp = new Opportunity(
-			RecordTypeID = GWBase.GW_RecTypes.GetRecordTypeId('Opportunity','Major Donor')==null?null:GWBase.GW_RecTypes.GetRecordTypeId('Opportunity','Major Donor'),
+			RecordTypeID = oppRectypeIdForTests,
 			Amount = 888888,
 			CloseDate = system.today().addDays(8),
 			StageName = GWBase.ONEN_Constants.OPP_DEFAULT_STAGE,
@@ -643,4 +745,5 @@ public with sharing class MovesManagement {
 		system.assertEquals(3,queryOCR.size(),'OpportunityContactRoles should be created for all Moves Management Team Members');
 
 	}
+
 }

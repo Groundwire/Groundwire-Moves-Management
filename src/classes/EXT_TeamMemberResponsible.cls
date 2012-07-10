@@ -67,6 +67,8 @@ public with sharing class EXT_TeamMemberResponsible {
 	}
 	
 	static testmethod void test() {
+		MovesManagement.setSettingsForTests();
+		
 		Contact movesManager = new Contact(
 			FirstName = 'Mr.',
 			LastName = 'Burns',
@@ -96,7 +98,7 @@ public with sharing class EXT_TeamMemberResponsible {
 		insert tm;
 		
 		Opportunity opp = new Opportunity(
-			RecordTypeID = GWBase.GW_RecTypes.GetRecordTypeId('Opportunity','Major Donor')==null?null:GWBase.GW_RecTypes.GetRecordTypeId('Opportunity','Major Donor'),
+			RecordTypeID = MovesManagement.oppRectypeIdForTests,
 			Amount = 888888,
 			CloseDate = system.today().addDays(8),
 			StageName = GWBase.ONEN_Constants.OPP_DEFAULT_STAGE,

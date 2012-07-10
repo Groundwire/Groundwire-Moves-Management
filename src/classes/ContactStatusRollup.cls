@@ -1,4 +1,4 @@
-global with sharing class ContactStatusRollup extends DonorStatusRollup {
+global class ContactStatusRollup extends DonorStatusRollup {
 
 	global ContactStatusRollup (id parentRecId) {
 		super (parentRecId);
@@ -23,12 +23,19 @@ global with sharing class ContactStatusRollup extends DonorStatusRollup {
 	global virtual override list<RollupSpec> setRollupSpecs() {
 		list<RollupSpec> mySpecs = new list<RollupSpec>();
 		
-		Moves_Management_Settings__c mmsettings = Moves_Management_Settings__c.getInstance();
+		/*
+		// getOrgDefaults was returning null here for tests even though we inserted a record at the start of the test
+		// likely siloing bug, so use the static vars in the main class instead
+		Moves_Management_Settings__c mmsettings = Moves_Management_Settings__c.getOrgDefaults();
+		system.debug(LoggingLevel.WARN,mmsettings);
+		*/
 		
-		set<string> movesRecordTypes = new set<string>();
+		set<string> movesRecordTypes = MovesManagement.movesRecordTypeNames;
+		/*
 		for (string s:mmsettings.Opportunity_Record_Types__c.split(';')) {
 			movesRecordTypes.add(s);
 		}
+		*/
 		
 		// create a rollup spec, specifying the object that has the details to be rolled up, 
 		// and the field in that table that relates it to the parent object
@@ -57,10 +64,13 @@ global with sharing class ContactStatusRollup extends DonorStatusRollup {
 	}	
 	
 	static testmethod void testNew () {
+		/*
 		Moves_Management_Settings__c mmsettings = new Moves_Management_Settings__c(
 			Opportunity_Record_Types__c = 'Major Gift'
 		);
 		insert mmsettings;
+		*/
+		MovesManagement.setSettingsForTests();
 
 		contact con = new contact(
 			lastname='testcontact',
@@ -71,7 +81,7 @@ global with sharing class ContactStatusRollup extends DonorStatusRollup {
 		
 		opportunity opp = new Opportunity(
 			Name = 'Huge Gift',
-			RecordTypeID = GWBase.GW_RecTypes.GetRecordTypeId('Opportunity','Major Gift'),
+			RecordTypeID = MovesManagement.oppRectypeIdForTests,
 			Amount = 88888888,
 			GWBase__ContactId__c = con.id,
 			StageName = 'Prospecting',
@@ -85,10 +95,13 @@ global with sharing class ContactStatusRollup extends DonorStatusRollup {
 	}
 	
 	static testmethod void testDropped () {
+		/*
 		Moves_Management_Settings__c mmsettings = new Moves_Management_Settings__c(
 			Opportunity_Record_Types__c = 'Major Gift'
 		);
 		insert mmsettings;
+		*/
+		MovesManagement.setSettingsForTests();
 
 		contact con = new contact(
 			lastname='testcontact',
@@ -99,7 +112,7 @@ global with sharing class ContactStatusRollup extends DonorStatusRollup {
 		
 		opportunity opp = new Opportunity(
 			Name = 'Huge Gift',
-			RecordTypeID = GWBase.GW_RecTypes.GetRecordTypeId('Opportunity','Major Gift'),
+			RecordTypeID = MovesManagement.oppRectypeIdForTests,
 			Amount = 88888888,
 			GWBase__ContactId__c = con.id,
 			StageName = 'Prospecting',

@@ -1,4 +1,4 @@
-global with sharing abstract class DonorStatusRollup extends GW_ABS_Rollup  {
+global abstract class DonorStatusRollup extends GW_ABS_Rollup  {
 
 	map<id,string> oppStageMap = new map<id,string>();
 	map<id,date> oppDateMap = new map<id,date>();
@@ -20,7 +20,7 @@ global with sharing abstract class DonorStatusRollup extends GW_ABS_Rollup  {
 	}
 	
 	public virtual override void customResultRowProcessing(SObject rollupRow,RollupSpec spec,SObject parentRec) {
-		system.debug('lookhere!' + rollupRow);
+		system.debug(LoggingLevel.WARN,'lookhere!' + rollupRow);
 		if (rollupRow.get('AggregateField0')!=null) {
 			id parentId;
 			

@@ -1,6 +1,7 @@
 public with sharing class CTRL_NewMove {
 
 	private Opportunity thisopp;
+	private string retURL;
 	public Task thisTask {get; set;}
 	public boolean error {get; set;}
 	
@@ -35,9 +36,9 @@ public with sharing class CTRL_NewMove {
 
     public CTRL_NewMove() {
     	error=false;
-        string oppid = ApexPages.currentPage().getParameters().get('id'); //controller.getid();//
-        if (oppid!=null && oppid.startsWith('006')) {
-        	thisopp = [SELECT Id, GWBase__ContactId__c FROM Opportunity WHERE Id=:oppid];
+        retURL = ApexPages.currentPage().getParameters().get('id');
+        if (retURL!=null && retURL.startsWith('006')) {
+        	thisopp = [SELECT Id, GWBase__ContactId__c FROM Opportunity WHERE Id=:retURL];
         	thisTask = new Task(whatid = thisopp.id);
         	if (thisopp.GWBase__ContactId__c != null) {
         		thisTask.WhoId = thisopp.GWBase__ContactId__c; 
@@ -59,7 +60,7 @@ public with sharing class CTRL_NewMove {
 		}
 		//update the task
 		insert thisTask;
-        ref = new pageReference('/'+thisTask.id+'/e');
+        ref = new pageReference('/'+thisTask.id+'/e?retURL=/'+retURL);
     	ref.setRedirect(true);    
         return ref;
     }

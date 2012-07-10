@@ -9,10 +9,9 @@ public with sharing class CTRL_NewMove {
 		get {
 			if (teamList==null) {
 				list<selectoption> sol = new list<selectoption>();
-				//if there is no responsible, add the record owner as the first option, make sure the list doesn't contain them.
-				sol.add(new SelectOption('',''));
-				for (Moves_Mgmt_Team_Member__c m : [SELECT Team_Member__c, Team_Member__r.Name, Team_Member__r.User__c 
-													FROM Moves_Mgmt_Team_Member__c WHERE Donor_Contact__c=:thisTask.WhoId ]) {
+				for (Moves_Mgmt_Team_Member__c m : [SELECT Team_Member__c, Team_Member__r.Name, Team_Member__r.User__c, Moves_Manager__c 
+													FROM Moves_Mgmt_Team_Member__c WHERE Donor_Contact__c=:thisTask.WhoId 
+													ORDER BY Moves_Manager__c DESC]) {
 					sol.add(new SelectOption(m.Team_Member__c, m.Team_Member__r.Name));
 				}	
 				teamlist=sol;

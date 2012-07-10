@@ -4,7 +4,7 @@
 			<apex:pageBlockButtons >
 					<apex:commandbutton value="Save" action="{!newTask}" />
 				</apex:pageBlockButtons>
-			<apex:pageBlockSection >
+			<apex:pageBlockSection columns="1">
 				<apex:inputField value="{!thisTask.Subject}" required="true"/>
 				<apex:inputField value="{!thisTask.ActivityDate}" required="true"/>
 				<apex:selectList id="mgr" value="{!thisTask.Team_Member_Responsible_ID__c}" size="1" title="Team Member Responsible">

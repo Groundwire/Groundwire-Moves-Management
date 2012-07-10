@@ -83,6 +83,7 @@
         <relationshipLabel>On Moves Management Team For</relationshipLabel>
         <relationshipName>Donors_On_Team_For</relationshipName>
         <relationshipOrder>0</relationshipOrder>
+        <reparentableMasterDetail>false</reparentableMasterDetail>
         <type>MasterDetail</type>
         <writeRequiresMasterRead>false</writeRequiresMasterRead>
     </fields>

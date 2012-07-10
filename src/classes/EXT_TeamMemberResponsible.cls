@@ -10,9 +10,9 @@ public with sharing class EXT_TeamMemberResponsible {
 				if (thisTask.Team_Member_Responsible_ID__c!=null && thisTask.Team_Member_Responsible_Name__c!=null) {
 					sol.add(new selectOption(thisTask.Team_Member_Responsible_ID__c, thisTask.Team_Member_Responsible_Name__c));
 					id tmr = (id)thisTask.Team_Member_Responsible_ID__c;
-					for (Moves_Mgmt_Team_Member__c m : [SELECT Team_Member__c, Team_Member__r.Name, Team_Member__r.User__c 
+					for (Moves_Mgmt_Team_Member__c m : [SELECT Team_Member__c, Team_Member__r.Name, Team_Member__r.User__c, Moves_Manager__c
 														FROM Moves_Mgmt_Team_Member__c WHERE Team_Member__c!=:tmr 
-														AND Donor_Contact__c=:thisTask.WhoId]) {
+														AND Donor_Contact__c=:thisTask.WhoId ORDER BY Moves_Manager__c DESC]) {
 						sol.add(new SelectOption(m.Team_Member__c, m.Team_Member__r.Name));
 					}	
 				} else {

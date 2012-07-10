@@ -160,17 +160,20 @@ public class MovesManagement {
 	
 	public void addTeamToOppContactRoles(list<Opportunity> opps) {
 		
+		// automatically create conroles for the entire MM team, for MM-type opps only
+		
 		map<id,set<id>> idToTeamMap = new map<id,set<id>>();
 		map<id,id> idToMovesManagerMap = new map<id,id>();
 		list<OpportunityContactRole> ocrToCreate = new list<OpportunityContactRole>();
 		
 		for (Opportunity o : opps) {
-			if (o.get('GWBase__ContactId__c') != null) {
-				idToTeamMap.put((id)o.get('GWBase__ContactId__c'),new set<id>());
-			} else if (o.AccountId != null) {
-				idToTeamMap.put(o.AccountId, new set<id>());
+			if (isMMOppRectype(o.RecordTypeId)) {
+				if (o.get('GWBase__ContactId__c') != null) {
+					idToTeamMap.put((id)o.get('GWBase__ContactId__c'),new set<id>());
+				} else if (o.AccountId != null) {
+					idToTeamMap.put(o.AccountId, new set<id>());
+				}
 			}
-			
 		}
 		
 		//query for all of the team members for each major donor and build out the map
@@ -184,6 +187,9 @@ public class MovesManagement {
 				idToMovesManagerMap.put(moved,tm.Team_Member__c);	
 			}
 		}
+		
+		system.debug (LoggingLevel.WARN,'idToTeamMap: ' + idToTeamMap);
+		system.debug (LoggingLevel.WARN,'idToMovesManagerMap: ' + idToMovesManagerMap);
 		
 		//loop through opps and build contact roles
 		for (Opportunity o : opps) {
@@ -210,6 +216,7 @@ public class MovesManagement {
 			}
 			
 		}
+		system.debug (LoggingLevel.WARN,'ocrToCreate: ' + ocrToCreate);
 		if (!ocrToCreate.isEmpty()) {
 			insert ocrToCreate;
 		}
@@ -713,6 +720,20 @@ public class MovesManagement {
 			Moves_Manager__c = movesManager.id
 		);
 		insert donor;
+
+		// reset recursion flag so trigger on acct will fire 
+		updatingMovesManagementTeam=false;
+
+		Account donorAcct = new Account (
+			Name = 'foo corp',
+			Moves_Manager__c = movesManager.id
+		);
+		insert donorAcct;
+		
+		Moves_Mgmt_Team_Member__c[] acctTM = [SELECT Id,Donor_Org__c,Team_Member__c,Moves_Manager__c FROM Moves_Mgmt_Team_Member__c WHERE Donor_Org__c = :donorAcct.Id];
+		system.assertEquals (1,acctTM.size());
+		system.assertEquals (movesManager.id,acctTM[0].Team_Member__c);
+		system.assertEquals (true,acctTM[0].Moves_Manager__c);
 		
 		Contact someOtherTeamMember = new Contact(
 			FirstName = 'Ned',
@@ -727,8 +748,15 @@ public class MovesManagement {
 			Moves_Manager__c = false
 		);
 		insert tm;
+		Moves_Mgmt_Team_Member__c tm2 = new Moves_Mgmt_Team_Member__c(
+			Donor_Org__c = donorAcct.id,
+			Team_Member__c = someOtherTeamMember.id,
+			Moves_Manager__c = false
+		);
+		insert tm2;
 		
 		test.starttest();
+		system.debug (LoggingLevel.WARN,'inserting opp for contact' );
 		Opportunity opp = new Opportunity(
 			RecordTypeID = oppRectypeIdForTests,
 			Amount = 888888,
@@ -739,10 +767,52 @@ public class MovesManagement {
 			GWBase__ContactId__c = donor.id
 		);
 		insert opp;
-		test.stoptest();
 		
 		list<OpportunityContactRole> queryOCR = [SELECT Id, Contact.Name, Role, IsPrimary FROM OpportunityContactRole WHERE OpportunityId=:opp.id];
 		system.assertEquals(3,queryOCR.size(),'OpportunityContactRoles should be created for all Moves Management Team Members');
+		
+		// now try the account
+		system.debug (LoggingLevel.WARN,'inserting opp for acct' );
+		Opportunity oppA = new Opportunity(
+			RecordTypeID = oppRectypeIdForTests,
+			Amount = 888888,
+			CloseDate = system.today().addDays(8),
+			StageName = GWBase.ONEN_Constants.OPP_DEFAULT_STAGE,
+			AccountId = donorAcct.Id
+		);
+		insert oppA;
+
+		list<OpportunityContactRole> queryOCRA = [SELECT Id, Contact.Name, Role, IsPrimary FROM OpportunityContactRole WHERE OpportunityId=:oppA.id];
+		// only 2 here b/c no donor conrole
+		system.assertEquals(2,queryOCRA.size(),'OpportunityContactRoles should be created for all Moves Management Team Members');
+		
+		
+		// now remove the setting, and try it again.  This time shouldn't create the OCR's
+		Moves_Mgmt_Settings__c settings = Moves_Mgmt_Settings__c.getOrgDefaults();
+		system.debug (Logginglevel.WARN, 'settings before update: ' + settings);
+		settings.Opportunity_Record_Types__c = '';
+		upsert settings;
+		
+		// gotta reset our static vars too
+		mmSettings = null;
+		movesRecordTypeIds = null;
+		
+		system.debug (LoggingLevel.WARN,'inserting opp for contact w/ wrong rectype' );
+		Opportunity opp2 = new Opportunity(
+			RecordTypeID = oppRectypeIdForTests,
+			Amount = 444,
+			CloseDate = system.today().addDays(8),
+			StageName = GWBase.ONEN_Constants.OPP_DEFAULT_STAGE,
+			GWBase__CR_Contact_Id__c = donor.id,
+			GWBase__CR_Contact_Role__c = 'Major Donor',
+			GWBase__ContactId__c = donor.id
+		);
+		insert opp2;
+		test.stoptest();
+
+		list<OpportunityContactRole> queryOCR2 = [SELECT Id, Contact.Name, Role, IsPrimary FROM OpportunityContactRole WHERE OpportunityId=:opp2.id];
+		system.assertEquals(1,queryOCR2.size(),'OCRs should be created for Moves Management Team since wrong rectype');
+		
 
 	}
 

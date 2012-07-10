@@ -2,10 +2,10 @@ public class MovesManagement {
 	
 	static boolean updatingMovesManagementTeam = false;
 	
-	public static Moves_Mgmt_Settings__c mmSettings;
-	public static set<id> movesRecordTypeIds;
-	public static set<string> movesRecordTypeNames;
-	public static boolean rectypesListEmpty = false;
+	Moves_Mgmt_Settings__c mmSettings;
+	set<id> movesRecordTypeIds;
+	set<string> movesRecordTypeNames;
+	boolean rectypesListEmpty = false;
 
 	
 	
@@ -282,7 +282,7 @@ public class MovesManagement {
 	public void getRectypeSettings () {
 		// grab settings if we haven't already
 		if (mmSettings == null) {
-			mmSettings = Moves_Mgmt_Settings__c.getOrgDefaults();
+			mmSettings = Moves_Mgmt_Settings__c.getInstance();
 			system.debug(LoggingLevel.WARN,'mmsettings in ismmopprectype' + mmsettings);
 
 			if (mmSettings.Opportunity_Record_Types__c == null) {
@@ -793,9 +793,11 @@ public class MovesManagement {
 		settings.Opportunity_Record_Types__c = '';
 		upsert settings;
 		
+		/*
 		// gotta reset our static vars too
 		mmSettings = null;
 		movesRecordTypeIds = null;
+		*/
 		
 		system.debug (LoggingLevel.WARN,'inserting opp for contact w/ wrong rectype' );
 		Opportunity opp2 = new Opportunity(

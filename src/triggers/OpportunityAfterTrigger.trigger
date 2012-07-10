@@ -3,17 +3,6 @@ trigger OpportunityAfterTrigger on Opportunity (after insert, after update) {
 	set<id> accountIds = new set<id>();
 	set<id> contactIds = new set<id>();
 	
-	/* refactored into class
-	Moves_Management_Settings__c mmsettings = Moves_Management_Settings__c.getInstance();
-	set<string> movesRecordTypes = new set<string>();
-	
-	for (string s:mmsettings.Opportunity_Record_Types__c.split(';')) {
-		movesRecordTypes.add(s);
-	}
-
-	set<id> movesRecordTypeIds = GWBase.GW_RecTypes.GetRecordTypeIdSet('Opportunity',movesRecordTypes);
-	*/
-
 	MovesManagement mm = new MovesManagement();
 
 	if (trigger.isinsert) {

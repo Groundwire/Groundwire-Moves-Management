@@ -256,12 +256,12 @@ public class MovesManagement {
 				Next_Move_Subject__c=null
 			);
 			if (openTaskMap.containsKey(oppId)) {
-				o.Last_Move_Id__c = (string)openTaskMap.get(oppId).id;
-				o.Last_Move_Subject__c = openTaskMap.get(oppId).Subject;
+				o.Next_Move_Id__c = (string)openTaskMap.get(oppId).id;
+				o.Next_Move_Subject__c = openTaskMap.get(oppId).Subject;
 			}
 			if (closedTaskMap.containsKey(oppId)) {
-				o.Next_Move_Id__c = (string)closedTaskMap.get(oppId).id;
-				o.Next_Move_Subject__c = closedTaskMap.get(oppId).Subject;
+				o.Last_Move_Id__c = (string)closedTaskMap.get(oppId).id;
+				o.Last_Move_Subject__c = closedTaskMap.get(oppId).Subject;
 			}
 			oppsToUpdate.add(o);
 		}
@@ -401,10 +401,10 @@ public class MovesManagement {
 		
 		list<Opportunity> queryOpp = [SELECT Id, Next_Move_ID__c, Last_Move_Id__c, Next_Move_Subject__c, Last_Move_Subject__c FROM Opportunity WHERE Id=:opp.id];
 		system.debug('Results!'+queryOpp);
-		system.assertEquals('subject5',queryOpp[0].Last_Move_Subject__c);
-		system.assert(queryOpp[0].Last_Move_Id__c!=NULL);
-		system.assertEquals('subject0',queryOpp[0].Next_Move_Subject__c);
-		system.assert(queryOpp[0].Next_Move_ID__c!=NULL);
+		system.assertEquals('subject5',queryOpp[0].Next_Move_Subject__c);
+		system.assert(queryOpp[0].Next_Move_Id__c == taskList[5].Id);
+		system.assertEquals('subject0',queryOpp[0].Last_Move_Subject__c);
+		system.assert(queryOpp[0].Last_Move_ID__c == taskList[0].Id);
 	}
 	
 	static testmethod void insertTeamMemberManager() {

@@ -27,7 +27,7 @@ public with sharing class CTRL_NewMove {
 	public list<Moves_Mgmt_Team_Member__c> movesTeam {
 		get {
 			if (movesTeam==null) {
-				list<Moves_Mgmt_Team_Member__c> mmtm = [ SELECT Team_Member__c, Team_Member__r.Name, Team_Member__r.User__c
+				list<Moves_Mgmt_Team_Member__c> mmtm = [ SELECT Team_Member__c, Team_Member__r.Name, Team_Member__r.User__c  
 														 FROM Moves_Mgmt_Team_Member__c WHERE (Donor_Contact__c=:donorId OR Donor_Org__c=:donorId) ];
 				movesTeam = mmtm;
 			}
@@ -60,6 +60,10 @@ public with sharing class CTRL_NewMove {
 			for (Moves_Mgmt_Team_Member__c mmtm : movesTeam) {
 				if (mmtm.Team_Member__c == thisTask.Team_Member_Responsible_ID__c) {
 					thisTask.Team_Member_Responsible_Name__c = mmtm.Team_Member__r.Name;
+					// also see if the "team member responsible" is a user.  if so, assign task to that user
+					if (mmtm.Team_Member__r.User__c != null) {
+						thisTask.OwnerId = mmtm.Team_Member__r.User__c;
+					}
 				}
 			}
 		}

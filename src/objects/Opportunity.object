@@ -82,38 +82,6 @@
     </businessProcesses>
     <enableFeeds>true</enableFeeds>
     <fields>
-        <fullName>CurrentGenerators__c</fullName>
-        <externalId>false</externalId>
-        <label>Current Generator(s)</label>
-        <length>100</length>
-        <required>false</required>
-        <trackFeedHistory>false</trackFeedHistory>
-        <type>Text</type>
-        <unique>false</unique>
-    </fields>
-    <fields>
-        <fullName>DeliveryInstallationStatus__c</fullName>
-        <externalId>false</externalId>
-        <label>Delivery/Installation Status</label>
-        <picklist>
-            <picklistValues>
-                <fullName>In progress</fullName>
-                <default>false</default>
-            </picklistValues>
-            <picklistValues>
-                <fullName>Yet to begin</fullName>
-                <default>false</default>
-            </picklistValues>
-            <picklistValues>
-                <fullName>Completed</fullName>
-                <default>false</default>
-            </picklistValues>
-            <sorted>false</sorted>
-        </picklist>
-        <trackFeedHistory>false</trackFeedHistory>
-        <type>Picklist</type>
-    </fields>
-    <fields>
         <fullName>GWBase__Amount_Requested__c</fullName>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
@@ -546,7 +514,19 @@
         <type>Currency</type>
     </fields>
     <fields>
+        <fullName>Is_Moves_Mgmt_RecType__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <formula>IF ( CONTAINS ( &quot;;&quot; &amp; $Setup.Moves_Mgmt_Settings__c.Opportunity_Record_Types__c &amp; &quot;;&quot; ,  &quot;;&quot; &amp; $RecordType.Name  &amp; &quot;;&quot; ) , &quot;True&quot; , &quot;False&quot; )</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <label>Is Moves Mgmt RecType</label>
+        <required>false</required>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
         <fullName>Last_Move_Id__c</fullName>
+        <deprecated>false</deprecated>
         <externalId>false</externalId>
         <inlineHelpText>The Id of the last completed move for this Opportunity.</inlineHelpText>
         <label>Last Move Id</label>
@@ -558,9 +538,10 @@
     </fields>
     <fields>
         <fullName>Last_Move_Subject__c</fullName>
+        <deprecated>false</deprecated>
         <externalId>false</externalId>
         <inlineHelpText>The Subject of the last completed move for this Opportunity.</inlineHelpText>
-        <label>Last Move Subject</label>
+        <label>Last Move</label>
         <length>255</length>
         <required>false</required>
         <trackFeedHistory>false</trackFeedHistory>
@@ -595,17 +576,8 @@
         <type>Picklist</type>
     </fields>
     <fields>
-        <fullName>MainCompetitors__c</fullName>
-        <externalId>false</externalId>
-        <label>Main Competitor(s)</label>
-        <length>100</length>
-        <required>false</required>
-        <trackFeedHistory>false</trackFeedHistory>
-        <type>Text</type>
-        <unique>false</unique>
-    </fields>
-    <fields>
         <fullName>Next_Move_ID__c</fullName>
+        <deprecated>false</deprecated>
         <externalId>false</externalId>
         <inlineHelpText>The ID of the next Moves Management task for this Opportunity that isn&apos;t completed.</inlineHelpText>
         <label>Next Move ID</label>
@@ -617,20 +589,11 @@
     </fields>
     <fields>
         <fullName>Next_Move_Subject__c</fullName>
+        <deprecated>false</deprecated>
         <externalId>false</externalId>
         <inlineHelpText>The Subject of the next Moves Management task for this Opportunity that isn&apos;t completed.</inlineHelpText>
-        <label>Next Move Subject</label>
+        <label>Next Move</label>
         <length>255</length>
-        <required>false</required>
-        <trackFeedHistory>false</trackFeedHistory>
-        <type>Text</type>
-        <unique>false</unique>
-    </fields>
-    <fields>
-        <fullName>OrderNumber__c</fullName>
-        <externalId>false</externalId>
-        <label>Order Number</label>
-        <length>8</length>
         <required>false</required>
         <trackFeedHistory>false</trackFeedHistory>
         <type>Text</type>
@@ -778,16 +741,6 @@
             <sorted>false</sorted>
         </picklist>
         <type>Picklist</type>
-    </fields>
-    <fields>
-        <fullName>TrackingNumber__c</fullName>
-        <externalId>false</externalId>
-        <label>Tracking Number</label>
-        <length>12</length>
-        <required>false</required>
-        <trackFeedHistory>false</trackFeedHistory>
-        <type>Text</type>
-        <unique>false</unique>
     </fields>
     <fields>
         <fullName>Type</fullName>
@@ -1088,21 +1041,6 @@
         <businessProcess>GWBase__Gift</businessProcess>
         <label>Gift</label>
         <picklistValues>
-            <picklist>DeliveryInstallationStatus__c</picklist>
-            <values>
-                <fullName>Completed</fullName>
-                <default>false</default>
-            </values>
-            <values>
-                <fullName>In progress</fullName>
-                <default>false</default>
-            </values>
-            <values>
-                <fullName>Yet to begin</fullName>
-                <default>false</default>
-            </values>
-        </picklistValues>
-        <picklistValues>
             <picklist>ForecastCategoryName</picklist>
             <values>
                 <fullName>Best Case</fullName>
@@ -1198,21 +1136,6 @@
         <active>true</active>
         <businessProcess>GWBase__Grant</businessProcess>
         <label>Grant</label>
-        <picklistValues>
-            <picklist>DeliveryInstallationStatus__c</picklist>
-            <values>
-                <fullName>Completed</fullName>
-                <default>false</default>
-            </values>
-            <values>
-                <fullName>In progress</fullName>
-                <default>false</default>
-            </values>
-            <values>
-                <fullName>Yet to begin</fullName>
-                <default>false</default>
-            </values>
-        </picklistValues>
         <picklistValues>
             <picklist>ForecastCategoryName</picklist>
             <values>
@@ -1310,21 +1233,6 @@
         <businessProcess>GWBase__Gift</businessProcess>
         <label>Membership</label>
         <picklistValues>
-            <picklist>DeliveryInstallationStatus__c</picklist>
-            <values>
-                <fullName>Completed</fullName>
-                <default>false</default>
-            </values>
-            <values>
-                <fullName>In progress</fullName>
-                <default>false</default>
-            </values>
-            <values>
-                <fullName>Yet to begin</fullName>
-                <default>false</default>
-            </values>
-        </picklistValues>
-        <picklistValues>
             <picklist>ForecastCategoryName</picklist>
             <values>
                 <fullName>Best Case</fullName>
@@ -1420,21 +1328,6 @@
         <active>true</active>
         <businessProcess>Major Gift Moves Management</businessProcess>
         <label>Major Gift</label>
-        <picklistValues>
-            <picklist>DeliveryInstallationStatus__c</picklist>
-            <values>
-                <fullName>Completed</fullName>
-                <default>false</default>
-            </values>
-            <values>
-                <fullName>In progress</fullName>
-                <default>false</default>
-            </values>
-            <values>
-                <fullName>Yet to begin</fullName>
-                <default>false</default>
-            </values>
-        </picklistValues>
         <picklistValues>
             <picklist>ForecastCategoryName</picklist>
             <values>
@@ -1539,24 +1432,6 @@
         <errorConditionFormula>GWBase__Non_Deductible_Amount__c &gt; Amount</errorConditionFormula>
         <errorMessage>The Non-Deductible Amount cannot be greater than the total Amount of the Opportunity.</errorMessage>
     </validationRules>
-    <webLinks>
-        <fullName>DeliveryStatus</fullName>
-        <availability>online</availability>
-        <displayType>link</displayType>
-        <hasMenubar>true</hasMenubar>
-        <hasScrollbars>true</hasScrollbars>
-        <hasToolbar>true</hasToolbar>
-        <height>600</height>
-        <isResizable>true</isResizable>
-        <linkType>url</linkType>
-        <masterLabel>Delivery Status</masterLabel>
-        <openType>newWindow</openType>
-        <position>none</position>
-        <protected>false</protected>
-        <showsLocation>true</showsLocation>
-        <showsStatus>true</showsStatus>
-        <url>http://www.fedex.com/cgi-bin/tracking?tracknumbers={!Opportunity_Tracking_Number}&amp;action=track&amp;language=english&amp;cntry_code=us</url>
-    </webLinks>
     <webLinks>
         <fullName>GWBase__Add_Installments</fullName>
         <availability>online</availability>

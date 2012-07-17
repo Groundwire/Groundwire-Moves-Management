@@ -33,6 +33,7 @@
         <type>Default</type>
     </actionOverrides>
     <deploymentStatus>Deployed</deploymentStatus>
+    <deprecated>false</deprecated>
     <enableActivities>false</enableActivities>
     <enableFeeds>false</enableFeeds>
     <enableHistory>false</enableHistory>
@@ -40,6 +41,7 @@
     <fields>
         <fullName>Donor_Contact__c</fullName>
         <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
         <externalId>false</externalId>
         <label>Donor (Contact)</label>
         <referenceTo>Contact</referenceTo>
@@ -51,6 +53,7 @@
     <fields>
         <fullName>Donor_Org__c</fullName>
         <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
         <externalId>false</externalId>
         <label>Donor (Org)</label>
         <referenceTo>Account</referenceTo>
@@ -62,12 +65,14 @@
     <fields>
         <fullName>Moves_Manager__c</fullName>
         <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
         <externalId>false</externalId>
         <label>Moves Manager</label>
         <type>Checkbox</type>
     </fields>
     <fields>
         <fullName>Team_Member_Notes__c</fullName>
+        <deprecated>false</deprecated>
         <externalId>false</externalId>
         <label>Team Member Notes</label>
         <length>500</length>
@@ -76,6 +81,7 @@
     </fields>
     <fields>
         <fullName>Team_Member__c</fullName>
+        <deprecated>false</deprecated>
         <externalId>false</externalId>
         <inlineHelpText>Staff or non-staff.  If the team member is on staff, you must create a Contact record for them if they don&apos;t already have one.</inlineHelpText>
         <label>Team Member</label>
@@ -83,7 +89,6 @@
         <relationshipLabel>On Moves Management Team For</relationshipLabel>
         <relationshipName>Donors_On_Team_For</relationshipName>
         <relationshipOrder>0</relationshipOrder>
-        <reparentableMasterDetail>false</reparentableMasterDetail>
         <type>MasterDetail</type>
         <writeRequiresMasterRead>false</writeRequiresMasterRead>
     </fields>

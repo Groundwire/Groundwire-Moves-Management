@@ -6,8 +6,9 @@
     <fields>
         <fullName>Opportunity_Record_Types__c</fullName>
         <defaultValue>&quot;Major Gift&quot;</defaultValue>
+        <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <inlineHelpText>Comma delimited list of Moves Management record types, e.g. Major Gift;Grant.  Moves Mgmt features will only operate on opps of these types.</inlineHelpText>
+        <inlineHelpText>Semicolon-delimited list of Moves Management record types, e.g. Major Gift;Grant.  Moves Mgmt features will only operate on opps of these types.</inlineHelpText>
         <label>Opportunity Record Types</label>
         <length>255</length>
         <required>false</required>

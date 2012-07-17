@@ -1380,16 +1380,6 @@ null)</formula>
         <unique>false</unique>
     </fields>
     <fields>
-        <fullName>Languages__c</fullName>
-        <externalId>false</externalId>
-        <label>Languages</label>
-        <length>100</length>
-        <required>false</required>
-        <trackFeedHistory>false</trackFeedHistory>
-        <type>Text</type>
-        <unique>false</unique>
-    </fields>
-    <fields>
         <fullName>LeadSource</fullName>
         <picklist>
             <picklistValues>
@@ -1417,29 +1407,8 @@ null)</formula>
         <type>Picklist</type>
     </fields>
     <fields>
-        <fullName>Level__c</fullName>
-        <externalId>false</externalId>
-        <label>Level</label>
-        <picklist>
-            <picklistValues>
-                <fullName>Secondary</fullName>
-                <default>false</default>
-            </picklistValues>
-            <picklistValues>
-                <fullName>Tertiary</fullName>
-                <default>false</default>
-            </picklistValues>
-            <picklistValues>
-                <fullName>Primary</fullName>
-                <default>false</default>
-            </picklistValues>
-            <sorted>false</sorted>
-        </picklist>
-        <trackFeedHistory>false</trackFeedHistory>
-        <type>Picklist</type>
-    </fields>
-    <fields>
         <fullName>Lifetime_Major_Gift_Goal__c</fullName>
+        <deprecated>false</deprecated>
         <externalId>false</externalId>
         <label>Lifetime Major Gift Goal</label>
         <precision>11</precision>
@@ -1449,7 +1418,64 @@ null)</formula>
         <type>Currency</type>
     </fields>
     <fields>
+        <fullName>Major_Donor_Affinity__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>how likely is this donor to give a major gift</inlineHelpText>
+        <label>Major Donor Affinity</label>
+        <picklist>
+            <picklistValues>
+                <fullName>High</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Medium</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Low</fullName>
+                <default>false</default>
+            </picklistValues>
+            <sorted>false</sorted>
+        </picklist>
+        <trackFeedHistory>false</trackFeedHistory>
+        <type>Picklist</type>
+    </fields>
+    <fields>
+        <fullName>Major_Donor_Capacity__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>indicate how much money you think the donor is capable of giving</inlineHelpText>
+        <label>Major Donor Capacity</label>
+        <picklist>
+            <picklistValues>
+                <fullName>$500 +</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>$1,000 +</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>$5,000 +</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>$10,000 +</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>$25,000 +</fullName>
+                <default>false</default>
+            </picklistValues>
+            <sorted>false</sorted>
+        </picklist>
+        <trackFeedHistory>false</trackFeedHistory>
+        <type>Picklist</type>
+    </fields>
+    <fields>
         <fullName>Moves_Management_Notes__c</fullName>
+        <deprecated>false</deprecated>
         <externalId>false</externalId>
         <inlineHelpText>Take general notes about this donor our strategy here.</inlineHelpText>
         <label>Moves Management Notes</label>
@@ -1460,6 +1486,7 @@ null)</formula>
     </fields>
     <fields>
         <fullName>Moves_Management_Prospect_Rating__c</fullName>
+        <deprecated>false</deprecated>
         <externalId>false</externalId>
         <label>Moves Management Prospect Rating</label>
         <picklist>
@@ -1482,6 +1509,13 @@ null)</formula>
     </fields>
     <fields>
         <fullName>Moves_Management_Status__c</fullName>
+        <deprecated>false</deprecated>
+        <description>This picklist should contain the special values:
+* Prospect
+* Stewarding
+* Dropped
+
+as well as all of the Open stages in your major gift sales process(es).  Trigger will automatically set status when donor has an open major gift opp.  When it goes closed won, stage will be set to Stewarding.</description>
         <externalId>false</externalId>
         <label>Moves Management Status</label>
         <picklist>
@@ -1521,6 +1555,7 @@ null)</formula>
     <fields>
         <fullName>Moves_Manager__c</fullName>
         <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
         <externalId>false</externalId>
         <label>Moves Manager</label>
         <referenceTo>Contact</referenceTo>
@@ -1533,6 +1568,7 @@ null)</formula>
     <fields>
         <fullName>On_Moves_Management_Team__c</fullName>
         <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
         <externalId>false</externalId>
         <inlineHelpText>Check this box to make this person available to put on Moves Management teams.</inlineHelpText>
         <label>On Moves Management Team</label>
@@ -1542,6 +1578,7 @@ null)</formula>
     <fields>
         <fullName>User__c</fullName>
         <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
         <externalId>false</externalId>
         <inlineHelpText>If this Contact has is an active Salesforce User, link the User account to their Contact record with this field.</inlineHelpText>
         <label>Related User</label>
@@ -1594,6 +1631,23 @@ null)</formula>
         <columns>CORE.USERS.ALIAS</columns>
         <filterScope>Everything</filterScope>
         <label>Engagement Level</label>
+    </listViews>
+    <listViews>
+        <fullName>Moves_Managed_Contacts</fullName>
+        <columns>FULL_NAME</columns>
+        <columns>ACCOUNT.NAME</columns>
+        <columns>Moves_Manager__c</columns>
+        <columns>Moves_Management_Status__c</columns>
+        <columns>CONTACT.TITLE</columns>
+        <columns>CONTACT.PHONE1</columns>
+        <columns>CONTACT.EMAIL</columns>
+        <columns>CORE.USERS.ALIAS</columns>
+        <filterScope>Everything</filterScope>
+        <filters>
+            <field>Moves_Manager__c</field>
+            <operation>notEqual</operation>
+        </filters>
+        <label>Moves Managed Contacts</label>
     </listViews>
     <listViews>
         <fullName>Moves_Management_Team</fullName>

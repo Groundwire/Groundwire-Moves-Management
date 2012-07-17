@@ -17,6 +17,9 @@ public class MovesManagement {
 			list<Contact> consToUpdate = new list<Contact>();
 			list<Account> accsToUpdate = new list<Account>();
 			
+			map<id,sobject> consMap = new map<id,sobject>(); 
+			map<id,sobject> acctMap = new map<id,sobject>(); 
+			
 			for (Moves_Mgmt_Team_Member__c tm : (isInsertOrUpdate ? listTeamMemberNew : listTeamMemberOld)) {
 				//if this team member is listed as the moves manager, update the contact lookup
 				
@@ -25,24 +28,36 @@ public class MovesManagement {
 						id = tm.Donor_Contact__c,
 						Moves_Manager__c = isInsertOrUpdate ? tm.Team_Member__c : null //if it's not an insert, it's a delete and we want to null out the Moves Manager field on Contact
 						);
-					consToUpdate.add(c);
+					// consToUpdate.add(c);
+					consMap.put (c.Id,c);
 				} else if (tm.Moves_Manager__c && tm.Donor_Org__c != null) {
 					Account a = new Account(
 						id = tm.Donor_Org__c,
 						Moves_Manager__c = isInsertOrUpdate ? tm.Team_Member__c : null //if it's not an insert, it's a delete and we want to null out the Moves Manager field on Contact
 					);
-					accsToUpdate.add(a);
+					// accsToUpdate.add(a);
+					acctMap.put(a.Id,a);
 				}
 			}
 			
-			if (!consToUpdate.isEmpty()) {
+			if (!consMap.isEmpty()) {
+				system.debug (LoggingLevel.WARN,'consmap before update: ' + consMap);
 				//in order to prevent recursion, set this variable so change to moves manager on contact doesn't trigger more code to run
 				updatingMovesManagementTeam = true;
-				update consToUpdate;
+				update consMap.values();
+				// also sync the team recs, because if we set this due to a checkbox in a team rec, there may be another one that needs to be unchecked
+				// except don't do it for a delete, because we don't have that issue
+				if (!isDelete) {
+					system.debug (LoggingLevel.WARN,'about to sync team recs!');
+					syncTeamRecs (consMap,true);
+				} 
 			}
-			if (!accsToUpdate.isEmpty()) {
+			if (!acctMap.isEmpty()) {
 				updatingMovesManagementTeam = true;
-				update accsToUpdate;
+				update acctMap.values();
+				if (!isDelete) {
+					syncTeamRecs (consMap,false);
+				}
 			}
 		}
 	}
@@ -79,51 +94,74 @@ public class MovesManagement {
 			boolean sObjectIsContact = ((string)conMap.values()[0].get('id')).startswith('003');
 
 			// map of contact id to all team members related to that contact
-			map<id,set<Moves_Mgmt_Team_Member__c>> conIdToTeamMap = new map<id,set<Moves_Mgmt_Team_Member__c>>();
+			// map<id,set<Moves_Mgmt_Team_Member__c>> conIdToTeamMap = new map<id,set<Moves_Mgmt_Team_Member__c>>();
+			map <id,sObject> recMapToProcess = new map <id,sObject>();
 			
 			// first we need to find all of the related team members for each contact in the trigger set, so we know whether to update an 
 			// existing team member record or create a new one
 			for (sObject c : conMap.values()) {
 				//only create or update team member records if Moves Manager lookup is populated or was just blanked out with an update
 				if ((!isUpdate && c.get('Moves_Manager__c') != null) || (isUpdate && c.get('Moves_Manager__c') != oldMap.get((id)c.get('id')).get('Moves_Manager__c'))) {
-					conIdToTeamMap.put((id)c.get('id'),new set<Moves_Mgmt_Team_Member__c>());
+					// conIdToTeamMap.put((id)c.get('id'),new set<Moves_Mgmt_Team_Member__c>());
+					recMapToProcess.put ((id)c.get('id'),c);
 				}
 			}
 			
+			if (!recMapToProcess.isEmpty()) {
+				syncTeamRecs (recMapToProcess,sObjectIsContact);
+			}
+
+		 }
+		
+	}
+
+	
+	private void syncTeamRecs (map<id,sObject> recMap, boolean sObjectIsContact) {
+
 			//now go find all of the existing team member records for these contacts and build out our map
-			if (!conIdToTeamMap.isEmpty()) {
+			if (!recMap.isEmpty()) {
 				
+				map<id,set<Moves_Mgmt_Team_Member__c>> recIdToTeamMap = new map<id,set<Moves_Mgmt_Team_Member__c>>();
 				list<Moves_Mgmt_Team_Member__c> teamMembersToCreate = new list<Moves_Mgmt_Team_Member__c>();
 				list<Moves_Mgmt_Team_Member__c> teamMembersToUpdate = new list<Moves_Mgmt_Team_Member__c>();
+				
+				// first fill the team map with empty sets of TM recs
+				for (id recId : recMap.keyset() ) {
+					recIdToTeamMap.put(recId , new set<Moves_Mgmt_Team_Member__c>());
+				}
 				
 				//if the sObjects are contacts, use the contact lookup on MMTM, otherwise use the Account lookup
 				if (sObjectIsContact) {
 					for (Moves_Mgmt_Team_Member__c tm : [SELECT id, Moves_Manager__c, Team_Member__c, Donor_Contact__c FROM Moves_Mgmt_Team_Member__c
-															WHERE Donor_Contact__c IN :conIdToTeamMap.keyset() ]) {
-						conIdToTeamMap.get(tm.Donor_Contact__c).add(tm);
+															WHERE Donor_Contact__c IN :recIdToTeamMap.keyset() ]) {
+						
+						recIdToTeamMap.get(tm.Donor_Contact__c).add(tm);
 					}
 				} else {
 					for (Moves_Mgmt_Team_Member__c tm : [SELECT id, Moves_Manager__c, Team_Member__c, Donor_Contact__c FROM Moves_Mgmt_Team_Member__c
-															WHERE Donor_Org__c IN :conIdToTeamMap.keyset() ]) {
-						conIdToTeamMap.get(tm.Donor_Contact__c).add(tm);
+															WHERE Donor_Org__c IN :recIdToTeamMap.keyset() ]) {
+						recIdToTeamMap.get(tm.Donor_Contact__c).add(tm);
 					}					
 				}
 				
+				system.debug (LoggingLevel.WARN,'recIdToTeamMap after queries: ' + recIdToTeamMap);
+				
 				// now loop back through the map and update or create team member records as needed to reflect
 				// the moves manager indicated on the contact record
-				for (id cid : conIdToTeamMap.keyset()) {
+				for (id cid : recIdToTeamMap.keyset()) {
 					// if we don't have any existing team member records, we need to create one
 					boolean createTeamMemberRecord = true;
-					for (Moves_Mgmt_Team_Member__c tm : conIdToTeamMap.get(cid)) {
-						if (tm.Team_Member__c == conMap.get(cid).get('Moves_Manager__c') && tm.Moves_Manager__c) {
+					for (Moves_Mgmt_Team_Member__c tm : recIdToTeamMap.get(cid)) {
+						if (tm.Team_Member__c == recMap.get(cid).get('Moves_Manager__c') && tm.Moves_Manager__c) {
 							//we already have the correct team manager
 							createTeamMemberRecord = false;
-							break;
-						} else if (tm.Team_Member__c != conMap.get(cid).get('Moves_Manager__c') && tm.Moves_Manager__c) {
+							// bugfix: don't want to break here, order is unreliable, we may still need to chg other recs
+							// break;
+						} else if (tm.Team_Member__c != recMap.get(cid).get('Moves_Manager__c') && tm.Moves_Manager__c) {
 							//there is a team member record with another Moves Manager marked, and we need to unmark and update that record	
 							tm.Moves_Manager__c = false;
 							teamMembersToUpdate.add(tm);
-						} else if (tm.Team_Member__c == conMap.get(cid).get('Moves_Manager__c') && !tm.Moves_Manager__c) {
+						} else if (tm.Team_Member__c == recMap.get(cid).get('Moves_Manager__c') && !tm.Moves_Manager__c) {
 							//there is a team member record for this Moves Manager, but that record is marked as the Moves Manager yet, so mark it
 							tm.Moves_Manager__c = true;
 							teamMembersToUpdate.add(tm);
@@ -133,7 +171,7 @@ public class MovesManagement {
 					
 					if (createTeamMemberRecord) {
 						Moves_Mgmt_Team_Member__c tm = new Moves_Mgmt_Team_Member__c(
-							Team_Member__c = (id)conMap.get(cid).get('Moves_Manager__c'),
+							Team_Member__c = (id)recMap.get(cid).get('Moves_Manager__c'),
 							Moves_Manager__c = true
 						);
 						if (sObjectIsContact) tm.Donor_Contact__c = cid;
@@ -151,12 +189,9 @@ public class MovesManagement {
 					update teamMembersToUpdate;
 				}
 				
-			}
-
-		}
+			}		
 		
 	}
-
 	
 	public void addTeamToOppContactRoles(list<Opportunity> opps) {
 		
@@ -566,20 +601,20 @@ public class MovesManagement {
 	static testmethod void replaceCurrentTeamManager() {
 		
 		setSettingsForTests();
-		
-		Contact donor = new Contact(
-			FirstName = 'Homer',
-			LastName = 'Simpson',
-			Moves_Manager__c = null
-		);
-		insert donor;
-		
+
 		Contact movesManager = new Contact(
 			FirstName = 'Mr.',
 			LastName = 'Burns',
 			On_Moves_Management_Team__c=true
 		);
 		insert movesManager;
+				
+		Contact donor = new Contact(
+			FirstName = 'Homer',
+			LastName = 'Simpson',
+			Moves_Manager__c = movesManager.Id
+		);
+		insert donor;
 		
 		Contact someOtherMovesManager = new Contact(
 			FirstName = 'Ned',
@@ -593,18 +628,31 @@ public class MovesManagement {
 			Team_Member__c = someOtherMovesManager.id,
 			Moves_Manager__c = true
 		);
+		updatingMovesManagementTeam = false;
+		system.debug (LoggingLevel.WARN,'changing MM via team rec..' );
 		insert tm;
 		
-		//insert team member record and we should get contact marked with Moves Manager
+		// at this point contact should have MM field updated, and initial mgr should have team rec but w/ mgr field unchecked
+		donor = [SELECT Id,Moves_Manager__c FROM Contact WHERE Id = :donor.Id LIMIT 1];
+		system.assertEquals (someOtherMovesManager.Id,donor.Moves_Manager__c);
+		
+		Moves_Mgmt_Team_Member__c[] FirstMMTeam = [SELECT Team_Member__c, Moves_Manager__c FROM Moves_Mgmt_Team_Member__c 
+													WHERE Donor_Contact__c = :donor.id AND Team_Member__c = :movesManager.id];
+		system.assertEquals(1,FirstMMTeam.size());											
+		system.assertEquals(false,FirstMMTeam[0].Moves_Manager__c);
+		
+		
+		// now switch it back on the contact to the original mgr
 		Test.startTest();
 		donor.Moves_Manager__c = movesManager.id;
 		updatingMovesManagementTeam = false;
 		update donor;
+		Test.stopTest();
 		
 		Moves_Mgmt_Team_Member__c[] team = [SELECT Team_Member__c, Moves_Manager__c FROM Moves_Mgmt_Team_Member__c WHERE Donor_Contact__c = :donor.id AND Team_Member__c = :someOtherMovesManager.id];
 		system.assertEquals(false,team[0].Moves_Manager__c);
 		
-		Test.stopTest();
+		
 	}
 	
 	static testmethod void updateContactOwnerToMovesManager(){

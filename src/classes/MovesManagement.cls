@@ -14,6 +14,11 @@ public class MovesManagement {
 		
 		//only exercise this code if we haven't just fired a trigger to set the moves manager on contact from the team member object
 		if (!updatingMovesManagementTeam) {
+			
+			if (!isDelete) {
+				system.debug (LoggingLevel.WARN,'running SetMovesManagerOnDonor on list of TM recs of size: ' + listTeamMemberNew.size());
+			}
+			
 			list<Contact> consToUpdate = new list<Contact>();
 			list<Account> accsToUpdate = new list<Account>();
 			
@@ -42,6 +47,7 @@ public class MovesManagement {
 			
 			if (!consMap.isEmpty()) {
 				system.debug (LoggingLevel.WARN,'consmap before update: ' + consMap);
+				// system.debug (LoggingLevel.WARN,'consmap size: ' + consMap.size());
 				//in order to prevent recursion, set this variable so change to moves manager on contact doesn't trigger more code to run
 				updatingMovesManagementTeam = true;
 				update consMap.values();
@@ -559,6 +565,53 @@ public class MovesManagement {
 		system.assertEquals(movesManager.id,team[0].Team_Member__c);
 		system.assertEquals(true,team[0].Moves_Manager__c);
 	}
+
+
+	static testmethod void testBulkMgrFieldFromTeamMbr() {
+		Contact[] donorCons =  GWBase.ONEN_UnitTestData.CreateMultipleTestContacts (25);
+		insert donorCons;
+		
+		Contact[] teamMbrCons = GWBase.ONEN_UnitTestData.CreateMultipleTestContacts (2);
+		for (Contact con: teamMbrCons) {
+			con.On_Moves_Management_Team__c = true;
+		}
+		insert teamMbrCons;
+		
+		Moves_Mgmt_Team_Member__c[] teamMbrs = new Moves_Mgmt_Team_Member__c[0];
+		for (Contact con:donorCons) {
+			id donorId = con.Id;
+			// integer teamMbrNbr = (i/40.0).round(RoundingMode.FLOOR).intvalue();
+			// id teamMbrId = teamMbrCons[teamMbrNbr].Id;
+			Moves_Mgmt_Team_Member__c tm = new Moves_Mgmt_Team_Member__c(
+				Donor_Contact__c = donorId,
+				Team_Member__c = teamMbrCons[0].Id,
+				Moves_Manager__c = true
+			);
+			teamMbrs.add(tm);		
+			Moves_Mgmt_Team_Member__c tm2 = new Moves_Mgmt_Team_Member__c(
+				Donor_Contact__c = donorId,
+				Team_Member__c = teamMbrCons[1].Id,
+				Moves_Manager__c = false
+			);
+			teamMbrs.add(tm2);		
+		}
+		updatingMovesManagementTeam = false;
+		
+		test.startTest();
+		system.debug (LoggingLevel.WARN,'about to insert TM recs..');
+		insert teamMbrs;
+		system.debug (LoggingLevel.WARN,'done inserting TM recs..');
+		test.stopTest();
+		
+		// now make sure that all contacts have a move mgr in the field
+		Contact[] donorCons2 = [SELECT Id,Moves_Manager__c FROM Contact WHERE id IN :donorCons];
+		// system.assertEquals(200,donorCons2.size());
+		for (Contact con : donorCons2) {
+			system.assert(con.Moves_Manager__c != null);
+		}
+		
+	}
+
 	
 	static testmethod void existingTeamManagerRecordConUpdate() {
 		

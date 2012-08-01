@@ -801,6 +801,17 @@ public class MovesManagement {
 		querytask = [SELECT id, Moves_Management_Stage__c FROM Task WHERE Id=:t.id];
 		system.assertEquals(querytask.Moves_Management_Stage__c, 'Cultivating');
 		
+		
+		// also create a task w/ no whatID, to make sure that doesn't throw anything off
+		Task t2 = new Task (
+			WhoId = donor.id,
+			Subject = 'foo',
+			ActivityDate = system.today()
+		);
+		insert t2;
+		// and complete it
+		t2.Status = closedtaskstatus.MasterLabel;
+		update t2;
 	}
 	
 

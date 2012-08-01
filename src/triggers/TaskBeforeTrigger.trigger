@@ -11,7 +11,7 @@ trigger TaskBeforeTrigger on Task (before update) {
 	//if this update closed the task and the MM Stage wasn't set manually, stamp with opp stage
 	for (Task t:trigger.new) {
 		Task oldTask = trigger.oldMap.get(t.Id);
-		if (((string)t.whatId).startsWith('006') && t.Moves_Management_Stage__c==null && closedStatus.contains(t.Status) && !closedStatus.contains(oldtask.status)) {
+		if (t.whatId != null && ((string)t.whatId).startsWith('006') && t.Moves_Management_Stage__c==null && closedStatus.contains(t.Status) && !closedStatus.contains(oldtask.status)) {
 			tasksToStamp.put(t.whatid, t);
 		}
 	}

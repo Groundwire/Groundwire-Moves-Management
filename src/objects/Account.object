@@ -686,8 +686,9 @@
         <fullName>Moves_Management_Notes__c</fullName>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <label>Moves Management Notes</label>
-        <length>30000</length>
+        <inlineHelpText>General notes about goals we&apos;re trying to hit for this prospect</inlineHelpText>
+        <label>Moves Management Goals</label>
+        <length>32000</length>
         <trackFeedHistory>false</trackFeedHistory>
         <type>LongTextArea</type>
         <visibleLines>5</visibleLines>
@@ -736,6 +737,17 @@ as well as all of the Open stages in your major gift sales process(es). Trigger 
         </picklist>
         <trackFeedHistory>false</trackFeedHistory>
         <type>Picklist</type>
+    </fields>
+    <fields>
+        <fullName>Moves_Management_Strategy__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>General notes about strategy for cultivating this prospect</inlineHelpText>
+        <label>Moves Management Strategy</label>
+        <length>32768</length>
+        <trackFeedHistory>false</trackFeedHistory>
+        <type>LongTextArea</type>
+        <visibleLines>5</visibleLines>
     </fields>
     <fields>
         <fullName>Moves_Manager__c</fullName>

@@ -502,7 +502,7 @@ NOTE: This does not take into account any past overrides or formerly-checked che
         <fullName>GWBase__HouseholdMembershipEndDate__c</fullName>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <formula>GWBase__ONEN_Household__r.GWBase__MembershipEndDate__c</formula>
+        <formula>IF ( ISNULL(GWBase__ONEN_Household__c) ,  GWBase__MembershipEndDate__c  , GWBase__ONEN_Household__r.GWBase__MembershipEndDate__c )</formula>
         <inlineHelpText>End date of the last membership for this person&apos;s household.</inlineHelpText>
         <label>Household Membership End Date</label>
         <required>false</required>
@@ -512,7 +512,7 @@ NOTE: This does not take into account any past overrides or formerly-checked che
         <fullName>GWBase__HouseholdMembershipJoinDate__c</fullName>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <formula>GWBase__ONEN_Household__r.GWBase__MembershipJoinDate__c</formula>
+        <formula>IF ( ISNULL(GWBase__ONEN_Household__c) ,  GWBase__MembershipJoinDate__c  ,GWBase__ONEN_Household__r.GWBase__MembershipJoinDate__c)</formula>
         <inlineHelpText>Start date of the first membership for this person&apos;s household.</inlineHelpText>
         <label>Household Membership Join Date</label>
         <required>false</required>
@@ -582,7 +582,7 @@ NOTE: This does not take into account any past overrides or formerly-checked che
         <fullName>GWBase__LastCloseDateHH__c</fullName>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <formula>GWBase__ONEN_Household__r.GWBase__LastCloseDate__c</formula>
+        <formula>IF ( ISNULL(GWBase__ONEN_Household__c) ,  GWBase__LastCloseDate__c  , GWBase__ONEN_Household__r.GWBase__LastCloseDate__c)</formula>
         <label>Last Household Gift Date</label>
         <required>false</required>
         <type>Date</type>
@@ -804,7 +804,7 @@ NOTE: This does not take into account any past overrides or formerly-checked che
         <fullName>GWBase__OppAmountLastNDaysHH__c</fullName>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <formula>GWBase__ONEN_Household__r.GWBase__OppAmountLastNDays__c</formula>
+        <formula>IF ( ISNULL(GWBase__ONEN_Household__c) ,  GWBase__OppAmountLastNDays__c  , GWBase__ONEN_Household__r.GWBase__OppAmountLastNDays__c)</formula>
         <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
         <label>Total Household Gifts Last 365 Days</label>
         <precision>18</precision>
@@ -828,7 +828,7 @@ NOTE: This does not take into account any past overrides or formerly-checked che
         <fullName>GWBase__OppAmountLastYearHH__c</fullName>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <formula>GWBase__ONEN_Household__r.GWBase__OppAmountLastYear__c</formula>
+        <formula>IF ( ISNULL(GWBase__ONEN_Household__c) ,  GWBase__OppAmountLastYear__c  , GWBase__ONEN_Household__r.GWBase__OppAmountLastYear__c)</formula>
         <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
         <label>Total Household Gifts Last Year</label>
         <precision>18</precision>
@@ -852,7 +852,7 @@ NOTE: This does not take into account any past overrides or formerly-checked che
         <fullName>GWBase__OppAmountThisYearHH__c</fullName>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <formula>GWBase__ONEN_Household__r.GWBase__OppAmountThisYear__c</formula>
+        <formula>IF ( ISNULL(GWBase__ONEN_Household__c) ,  GWBase__OppAmountThisYear__c  , GWBase__ONEN_Household__r.GWBase__OppAmountThisYear__c )</formula>
         <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
         <label>Total Household Gifts This Year</label>
         <precision>18</precision>
@@ -1360,7 +1360,7 @@ null)</formula>
         <fullName>GWBase__Total_Household_Gifts__c</fullName>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <formula>GWBase__ONEN_Household__r.GWBase__TotalOppAmount__c</formula>
+        <formula>IF ( ISNULL(GWBase__ONEN_Household__c) ,  GWBase__TotalOppAmount__c  , GWBase__ONEN_Household__r.GWBase__TotalOppAmount__c )</formula>
         <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
         <label>Total Household Gifts</label>
         <precision>18</precision>
@@ -1477,9 +1477,9 @@ null)</formula>
         <fullName>Moves_Management_Notes__c</fullName>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
-        <inlineHelpText>Take general notes about this donor our strategy here.</inlineHelpText>
-        <label>Moves Management Notes</label>
-        <length>20000</length>
+        <inlineHelpText>General notes about goals we&apos;re shooting for with this prospect</inlineHelpText>
+        <label>Moves Management Goals</label>
+        <length>32768</length>
         <trackFeedHistory>false</trackFeedHistory>
         <type>LongTextArea</type>
         <visibleLines>4</visibleLines>
@@ -1553,6 +1553,17 @@ as well as all of the Open stages in your major gift sales process(es).  Trigger
         <type>Picklist</type>
     </fields>
     <fields>
+        <fullName>Moves_Management_Strategy__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>general notes about MM strategy</inlineHelpText>
+        <label>Moves Management Strategy</label>
+        <length>32768</length>
+        <trackFeedHistory>false</trackFeedHistory>
+        <type>LongTextArea</type>
+        <visibleLines>5</visibleLines>
+    </fields>
+    <fields>
         <fullName>Moves_Manager__c</fullName>
         <deleteConstraint>SetNull</deleteConstraint>
         <deprecated>false</deprecated>
@@ -1571,7 +1582,7 @@ as well as all of the Open stages in your major gift sales process(es).  Trigger
         <deprecated>false</deprecated>
         <externalId>false</externalId>
         <inlineHelpText>Check this box to make this person available to put on Moves Management teams.</inlineHelpText>
-        <label>On Moves Management Team</label>
+        <label>Moves Management Team Member</label>
         <trackFeedHistory>false</trackFeedHistory>
         <type>Checkbox</type>
     </fields>

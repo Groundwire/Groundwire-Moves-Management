@@ -144,9 +144,9 @@ public class MovesManagement {
 						recIdToTeamMap.get(tm.Donor_Contact__c).add(tm);
 					}
 				} else {
-					for (Moves_Mgmt_Team_Member__c tm : [SELECT id, Moves_Manager__c, Team_Member__c, Donor_Contact__c FROM Moves_Mgmt_Team_Member__c
+					for (Moves_Mgmt_Team_Member__c tm : [SELECT id, Moves_Manager__c, Team_Member__c, Donor_Org__c FROM Moves_Mgmt_Team_Member__c
 															WHERE Donor_Org__c IN :recIdToTeamMap.keyset() ]) {
-						recIdToTeamMap.get(tm.Donor_Contact__c).add(tm);
+						recIdToTeamMap.get(tm.Donor_Org__c).add(tm);
 					}					
 				}
 				
@@ -567,6 +567,8 @@ public class MovesManagement {
 	}
 
 
+
+
 	static testmethod void testBulkMgrFieldFromTeamMbr() {
 		Contact[] donorCons =  GWBase.ONEN_UnitTestData.CreateMultipleTestContacts (25);
 		insert donorCons;
@@ -754,10 +756,44 @@ public class MovesManagement {
 		insert donor;
 		
 		donor.Moves_Manager__c = movesManager.id;
+		updatingMovesManagementTeam = false;
 		update donor;
 		
 		list<Account> queryDonor = [SELECT OwnerId FROM Account WHERE ID=:donor.id];
 		system.assertEquals(queryDonor[0].OwnerId,movesManager.User__c,'Assigning a Moves Manager with an associated user account should transfer the Donor\'s owner.');
+		
+		// now change it to a different value, for a new MM (non-user)
+		Contact newMM = new Contact (
+			FirstName = 'Dr',
+			LastName = 'Strangelove',
+			On_Moves_Management_Team__c=true
+		);
+		insert newMM;
+		
+		donor.Moves_Manager__c = newMM.Id;
+		updatingMovesManagementTeam = false;
+		update donor;
+
+		// MM should change but owner should stay the same
+		queryDonor = [SELECT OwnerId,Moves_Manager__c FROM Account WHERE ID=:donor.id];
+		system.assertEquals(queryDonor[0].OwnerId,movesManager.User__c,'Owner shouldnt change if new MM is not a user.');
+		system.assertEquals(newMM.Id,queryDonor[0].Moves_Manager__c,'Moves mgr field failed to be updated');
+		
+		// also make sure that the team records for both members are correct
+		Moves_Mgmt_Team_Member__c[] team = [SELECT Team_Member__c, Moves_Manager__c FROM Moves_Mgmt_Team_Member__c WHERE Donor_Org__c = :donor.id];
+		system.debug (LoggingLevel.WARN,'team after MM update:' + team);
+		system.assertEquals (2,team.size());
+		for (Moves_Mgmt_Team_Member__c TM : team) {
+			if (TM.Team_Member__c == newMM.Id) {
+				system.assert(TM.Moves_Manager__c == true,'new MM did not get MM checkbox checked in team rec');
+			}
+			if (TM.Team_Member__c == movesManager.Id) {
+				system.assert(TM.Moves_Manager__c == false,'old MM did not get MM checkbox unchecked in team rec');
+			}
+		} 
+		
+		
+		
 	}
 	
 	static testmethod void testTaskOppStageStamp() {

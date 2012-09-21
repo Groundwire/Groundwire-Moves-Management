@@ -35,9 +35,11 @@ trigger TaskAfterTrigger on Task (after delete, after insert, after undelete, af
 				}
 			}
 			
-			if (t.whatId!=null && ((string)oldTask.whatId).startsWith('006')) {
-				if (t.whatId != oldTask.whatId) {
-					oppsToRollup.add(oldTask.whatId);
+			if (t.whatId!=null && oldTask.whatId != null ) {
+				if ( ((string)oldTask.whatId).startsWith('006') ) {
+					if (t.whatId != oldTask.whatId) {
+						oppsToRollup.add(oldTask.whatId);
+					}
 				}
 			}
 		}

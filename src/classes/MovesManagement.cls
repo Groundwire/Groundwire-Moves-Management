@@ -845,8 +845,11 @@ public class MovesManagement {
 			ActivityDate = system.today()
 		);
 		insert t2;
-		// and complete it
+		// and complete it 
 		t2.Status = closedtaskstatus.MasterLabel;
+		update t2;
+		// then add a whatid (this was throwing an err)
+		t2.WhatId = opp.id;
 		update t2;
 	}
 	

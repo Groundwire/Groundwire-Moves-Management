@@ -90,6 +90,41 @@ public class MovesManagement {
 		}
 	}
 	
+
+	public Id setOppOwnerToDonorMM (SObject oppObj) {
+
+		// sets the owner of a single opp to donor's MM (if any, and valid user)
+		
+		id mmContact;
+		id mmUser;
+		id ownerId;
+		Opportunity opp = (Opportunity) oppObj;
+		// first find contact ID of MM
+		if (isMMOppRectype (opp.RecordTypeId)) {
+			if (opp.AccountId != null) {
+				Account[] accts = [SELECT Id,Moves_Manager__c FROM Account WHERE Id=:opp.AccountID LIMIT 1];
+				if (accts != null) mmContact = accts[0].Moves_Manager__c;
+			} else if (opp.GWBase__ContactId__c != null){
+				Contact[] cons = [SELECT Id,Moves_Manager__c FROM Contact WHERE Id=:opp.GWBase__ContactId__c LIMIT 1];
+				if (cons != null) mmContact = cons[0].Moves_Manager__c; 
+			}
+		}
+		
+		// then look up user id
+		if (mmContact != null) {
+			Contact[] mmCon = [SELECT Id,User__c FROM Contact WHERE Id=:mmContact LIMIT 1];
+			if (mmCon!=null && mmCon[0].User__c!=null) {
+				Id userId = mmCon[0].User__c;
+				List<User> usr = [SELECT Id,IsActive FROM User WHERE Id=:userId LIMIT 1];
+				// if (usr!=null) opp.OwnerId = usr[0].Id;
+				if (usr!=null) ownerId = usr[0].Id;
+			}
+			
+		}
+
+		// return opp;
+		return ownerId;
+	}
 	
 	public void SetMovesManagerOnTeamMember(map<id,sObject> conMap, map<id,sObject> oldMap, boolean isUpdate) {
 		
@@ -858,10 +893,14 @@ public class MovesManagement {
 		
 		setSettingsForTests();
 
+		User mmUser = [SELECT id FROM user WHERE IsActive=true AND Profile.Name='System Administrator' LIMIT 1];
+		system.assert(mmUser.id!=null,'Sys Admin User Account should not be null');
+
 		Contact movesManager = new Contact(
 			FirstName = 'Mr.',
 			LastName = 'Burns',
-			On_Moves_Management_Team__c=true
+			On_Moves_Management_Team__c=true,
+			User__c = mmUser.Id
 		);
 		insert movesManager;
 
@@ -919,8 +958,11 @@ public class MovesManagement {
 		);
 		insert opp;
 		
-		list<OpportunityContactRole> queryOCR = [SELECT Id, Contact.Name, Role, IsPrimary FROM OpportunityContactRole WHERE OpportunityId=:opp.id];
+		list<OpportunityContactRole> queryOCR = [SELECT Id, Contact.Name, Role, IsPrimary, Opportunity.OwnerId FROM OpportunityContactRole WHERE OpportunityId=:opp.id];
 		system.assertEquals(3,queryOCR.size(),'OpportunityContactRoles should be created for all Moves Management Team Members');
+		
+		// should also have MM as the owner
+		system.assertEquals(mmUser.Id,queryOCR[0].Opportunity.OwnerId,'Opp owner did not get set to moves manager of the donor');
 		
 		// now try the account
 		system.debug (LoggingLevel.WARN,'inserting opp for acct' );

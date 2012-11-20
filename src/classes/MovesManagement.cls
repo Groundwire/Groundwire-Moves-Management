@@ -192,21 +192,32 @@ public class MovesManagement {
 				for (id cid : recIdToTeamMap.keyset()) {
 					// if we don't have any existing team member records, we need to create one
 					boolean createTeamMemberRecord = true;
+					boolean isMMFieldOnParentNull = ( recMap.get(cid).get('Moves_Manager__c') == null ) ? true : false;
+					system.debug (LoggingLevel.WARN,'isMMFieldOnParentNull:' + isMMFieldOnParentNull);
 					for (Moves_Mgmt_Team_Member__c tm : recIdToTeamMap.get(cid)) {
-						if (tm.Team_Member__c == recMap.get(cid).get('Moves_Manager__c') && tm.Moves_Manager__c) {
-							//we already have the correct team manager
+						if (!isMMFieldOnParentNull) {
+							if (tm.Team_Member__c == recMap.get(cid).get('Moves_Manager__c') && tm.Moves_Manager__c) {
+								//we already have the correct team manager
+								createTeamMemberRecord = false;
+								// bugfix: don't want to break here, order is unreliable, we may still need to chg other recs
+								// break;
+							} else if (tm.Team_Member__c != recMap.get(cid).get('Moves_Manager__c') && tm.Moves_Manager__c) {
+								//there is a team member record with another Moves Manager marked, and we need to unmark and update that record	
+								tm.Moves_Manager__c = false;
+								teamMembersToUpdate.add(tm);
+							} else if (tm.Team_Member__c == recMap.get(cid).get('Moves_Manager__c') && !tm.Moves_Manager__c) {
+								//there is a team member record for this Moves Manager, but that record is marked as the Moves Manager yet, so mark it
+								tm.Moves_Manager__c = true;
+								teamMembersToUpdate.add(tm);
+								createTeamMemberRecord = false;
+							}
+						} else {
+							// if the MM field on the parent was blanked out, then just make sure that none of the team recs are marked as mgr
 							createTeamMemberRecord = false;
-							// bugfix: don't want to break here, order is unreliable, we may still need to chg other recs
-							// break;
-						} else if (tm.Team_Member__c != recMap.get(cid).get('Moves_Manager__c') && tm.Moves_Manager__c) {
-							//there is a team member record with another Moves Manager marked, and we need to unmark and update that record	
-							tm.Moves_Manager__c = false;
-							teamMembersToUpdate.add(tm);
-						} else if (tm.Team_Member__c == recMap.get(cid).get('Moves_Manager__c') && !tm.Moves_Manager__c) {
-							//there is a team member record for this Moves Manager, but that record is marked as the Moves Manager yet, so mark it
-							tm.Moves_Manager__c = true;
-							teamMembersToUpdate.add(tm);
-							createTeamMemberRecord = false;
+							if (tm.Moves_Manager__c) {
+								tm.Moves_Manager__c = false;
+								teamMembersToUpdate.add(tm);
+							}
 						}
 					}
 					
@@ -741,6 +752,20 @@ public class MovesManagement {
 		
 		Moves_Mgmt_Team_Member__c[] team = [SELECT Team_Member__c, Moves_Manager__c FROM Moves_Mgmt_Team_Member__c WHERE Donor_Contact__c = :donor.id AND Team_Member__c = :someOtherMovesManager.id];
 		system.assertEquals(false,team[0].Moves_Manager__c);
+		Moves_Mgmt_Team_Member__c MgrTeamRec = [SELECT Team_Member__c, Moves_Manager__c FROM Moves_Mgmt_Team_Member__c WHERE Donor_Contact__c = :donor.id AND Team_Member__c = :movesManager.id LIMIT 1];
+		system.assertEquals(true,MgrTeamRec.Moves_Manager__c,'did not switch mark Manager box in team rec when changing mgr on contact');
+
+		// now blank out the MM field on the contact
+		// should uncheck the MM field in the team
+		system.debug (LoggingLevel.WARN,'blanking out MM field on contact..' );
+		donor.Moves_Manager__c = null;
+		updatingMovesManagementTeam = false;
+		update donor;
+		donor = [SELECT Id,Name,Moves_Manager__c FROM Contact WHERE Id=:Donor.Id LIMIT 1];
+		system.debug (LoggingLevel.WARN,'contact after update:' + donor);
+		MgrTeamRec = [SELECT Team_Member__c, Moves_Manager__c FROM Moves_Mgmt_Team_Member__c WHERE Donor_Contact__c = :donor.id AND Team_Member__c = :movesManager.id LIMIT 1];
+		system.assertEquals(false,MgrTeamRec.Moves_Manager__c,'did not uncheck Manager box in team rec when blanking out mgr field in contact');
+		
 		
 		
 	}
